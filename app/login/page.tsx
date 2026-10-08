@@ -23,9 +23,20 @@ export default function LoginPage() {
 
         if (error) {
             alert(error.message);
-        } else {
-            router.push('/dashboard');
+            setLoading(false);
+            return;
         }
+
+        const verify = await fetch('/api/auth/verify', { method: 'POST' });
+        if (!verify.ok) {
+            await supabase.auth.signOut();
+            alert('This account is not allowed to access admin.');
+            setLoading(false);
+            return;
+        }
+
+        router.push('/dashboard');
+        router.refresh();
         setLoading(false);
     };
 

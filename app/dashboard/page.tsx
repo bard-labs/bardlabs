@@ -5,14 +5,18 @@ import { CategoryManager } from '@/components/Admin/CategoryManager';
 import { ProjectEditor } from '@/components/Admin/ProjectEditor';
 import { LogEntry } from '@/components/Admin/LogEntry';
 import { BrainNodeEditor } from '@/components/Admin/BrainNodeEditor';
+import { SignOutButton } from '@/components/Admin/SignOutButton';
 
 
 export default function Dashboard() {
     return (
         <div className="min-h-screen bg-[#050505] text-white font-sans p-8 pb-32">
-            <header className="mb-12">
-                <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-                <p className="text-neutral-400">Manage content, categories, and the brain.</p>
+            <header className="mb-12 flex items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+                    <p className="text-neutral-400">Manage content, categories, and the brain.</p>
+                </div>
+                <SignOutButton />
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-7xl mx-auto">

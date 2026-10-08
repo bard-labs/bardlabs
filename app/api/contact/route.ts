@@ -9,7 +9,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // 1. Verify Turnstile Token
+        if (!process.env.TURNSTILE_SECRET_KEY) {
+            return NextResponse.json({ error: 'Captcha is not configured' }, { status: 503 });
+        }
+
+        // 1. Verify Turnstile Token — secret stays on the server so bots cannot skip the widget
         const turnstileResult = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
             method: 'POST',
             headers: {

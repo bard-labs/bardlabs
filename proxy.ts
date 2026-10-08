@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getAllowedAdminEmail, isAdminEmail } from '@/utils/admin'
 
 export async function proxy(request: NextRequest) {
     let response = NextResponse.next({
@@ -24,33 +25,47 @@ export async function proxy(request: NextRequest) {
                         request,
                     })
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        response.cookies.set(name, value, options)
+                        response.cookies.set(name, value, {
+                            ...options,
+                            httpOnly: true,
+                            sameSite: 'lax',
+                            path: '/',
+                            secure: process.env.NODE_ENV === 'production',
+                        })
                     )
                 },
             },
         }
     )
 
-    // Protect Admin Routes
-    if (request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/admin')) {
-        const {
-            data: { user },
-        } = await supabase.auth.getUser()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
 
-        if (!user) {
-            return NextResponse.redirect(new URL('/login', request.url))
+    const isAdmin = isAdminEmail(user?.email)
+    const isProtected =
+        request.nextUrl.pathname.startsWith('/dashboard') ||
+        request.nextUrl.pathname.startsWith('/admin')
+
+    if (user && !isAdmin && getAllowedAdminEmail()) {
+        await supabase.auth.signOut()
+        if (isProtected || request.nextUrl.pathname === '/login') {
+            const url = request.nextUrl.clone()
+            url.pathname = '/login'
+            return NextResponse.redirect(url)
         }
     }
 
-    // Redirect authenticated users away from login page
-    if (request.nextUrl.pathname === '/login') {
-        const {
-            data: { user },
-        } = await supabase.auth.getUser()
+    if (isProtected && !isAdmin) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        return NextResponse.redirect(url)
+    }
 
-        if (user) {
-            return NextResponse.redirect(new URL('/dashboard', request.url))
-        }
+    if (request.nextUrl.pathname === '/login' && isAdmin) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
     }
 
     return response
@@ -58,13 +73,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * Feel free to modify this pattern to include more paths.
-         */
         '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
