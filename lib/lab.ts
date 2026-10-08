@@ -1,3 +1,25 @@
+import type { LucideIcon } from "lucide-react"
+import {
+  Atom,
+  Cpu,
+  Layout,
+  Orbit,
+  Sparkles,
+  Waves,
+  Folder,
+  Brain,
+} from "lucide-react"
+
+export type LabDiscipline = {
+  id: string
+  title: string
+  subtitle: string
+  summary: string
+  href: string
+  span: string
+  icon: LucideIcon
+}
+
 export type LabLink = {
   id: string
   title: string
@@ -6,50 +28,78 @@ export type LabLink = {
   span: string
 }
 
-/** Uneven Swiss grid used when the overlay opens away from the hero. */
-export const labNavCells: LabLink[] = [
+export const labDisciplines: LabDiscipline[] = [
   {
     id: "systems",
     title: "Systems",
     subtitle: "IoT · Embedded · Hardware",
-    href: "/projects",
+    summary:
+      "Boards, sensors, radios, and firmware that connect the physical world to software.",
+    href: "/lab/systems",
     span: "col-span-4 md:col-span-4",
+    icon: Cpu,
   },
   {
     id: "intelligence",
     title: "Intelligence",
     subtitle: "Software · AI · Automation",
-    href: "/projects",
+    summary:
+      "Product software, models, and automation loops that compound human effort.",
+    href: "/lab/intelligence",
     span: "col-span-4 md:col-span-8",
+    icon: Sparkles,
   },
   {
     id: "mechanics",
     title: "Mechanics",
     subtitle: "Robots · Motion · Control",
-    href: "/projects",
+    summary:
+      "Mechanisms, actuators, and control systems that move matter with intent.",
+    href: "/lab/mechanics",
     span: "col-span-4 md:col-span-3",
+    icon: Waves,
   },
   {
     id: "inquiry",
     title: "Inquiry",
     subtitle: "Physics · Study · Theory",
-    href: "/brain",
+    summary:
+      "First-principles study — physics, maths, and the notes that feed every build.",
+    href: "/lab/inquiry",
     span: "col-span-4 md:col-span-3",
+    icon: Atom,
   },
   {
     id: "flight",
     title: "Flight",
     subtitle: "Aerospace · Avionics",
-    href: "/projects",
+    summary:
+      "Structures, sensing, and avionics thinking applied to flight-adjacent systems.",
+    href: "/lab/flight",
     span: "col-span-4 md:col-span-6",
+    icon: Orbit,
   },
   {
     id: "surfaces",
     title: "Surfaces",
     subtitle: "Interfaces · Aesthetic web",
-    href: "/projects",
+    summary:
+      "Interfaces and aesthetic websites — software you can feel, not only use.",
+    href: "/lab/surfaces",
     span: "col-span-4 md:col-span-8",
+    icon: Layout,
   },
+]
+
+/** Uneven Swiss grid used in the Lab index overlay. */
+export const labNavCells: LabLink[] = [
+  ...labDisciplines.map(({ id, title, subtitle, href, span }) => ({
+    id,
+    title,
+    subtitle,
+    href,
+    span,
+  })),
   {
     id: "archive",
     title: "Archive",
@@ -57,55 +107,28 @@ export const labNavCells: LabLink[] = [
     href: "/projects",
     span: "col-span-4 md:col-span-4",
   },
+  {
+    id: "brain",
+    title: "Brain",
+    subtitle: "Knowledge map",
+    href: "/brain",
+    span: "col-span-4 md:col-span-4",
+  },
 ]
 
-export const skillWheelItems = [
-  {
-    label: "Embedded Systems",
-    image:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80&auto=format&fit=crop",
-    imageAlt: "Circuit board macro",
-  },
-  {
-    label: "IoT Networks",
-    image:
-      "https://images.unsplash.com/photo-1558346490-a3598da6bb45?w=1200&q=80&auto=format&fit=crop",
-    imageAlt: "Connected devices",
-  },
-  {
-    label: "Intelligent Software",
-    image:
-      "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=1200&q=80&auto=format&fit=crop",
-    imageAlt: "Code on a screen",
-  },
-  {
-    label: "AI & Automation",
-    image:
-      "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80&auto=format&fit=crop",
-    imageAlt: "Abstract AI visualization",
-  },
-  {
-    label: "Mechanics & Robotics",
-    image:
-      "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1200&q=80&auto=format&fit=crop",
-    imageAlt: "Robot arm",
-  },
-  {
-    label: "Aerospace Systems",
-    image:
-      "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1200&q=80&auto=format&fit=crop",
-    imageAlt: "Earth from orbit",
-  },
-  {
-    label: "Physical Inquiry",
-    image:
-      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1200&q=80&auto=format&fit=crop",
-    imageAlt: "Physics chalkboard",
-  },
-  {
-    label: "Interface Craft",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80&auto=format&fit=crop",
-    imageAlt: "Design workspace",
-  },
+export const skillOrbitItems = labDisciplines.map((d) => ({
+  id: d.id,
+  label: d.title,
+  detail: d.subtitle,
+  href: d.href,
+  icon: d.icon,
+}))
+
+export const portalLinks = [
+  { title: "Archive", subtitle: "Project Universe", href: "/projects", icon: Folder },
+  { title: "The Brain", subtitle: "Interactive knowledge map", href: "/brain", icon: Brain },
 ]
+
+export function getDiscipline(id: string) {
+  return labDisciplines.find((d) => d.id === id)
+}

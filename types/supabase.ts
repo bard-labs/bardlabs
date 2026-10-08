@@ -126,6 +126,33 @@ export type Database = {
                 }
                 Relationships: []
             }
+            lab_disciplines: {
+                Row: {
+                    id: string
+                    title: string
+                    subtitle: string
+                    summary: string
+                    sort_order: number
+                    created_at: string
+                }
+                Insert: {
+                    id: string
+                    title: string
+                    subtitle: string
+                    summary: string
+                    sort_order?: number
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    title?: string
+                    subtitle?: string
+                    summary?: string
+                    sort_order?: number
+                    created_at?: string
+                }
+                Relationships: []
+            }
         }
         Views: {
             [_ in never]: never

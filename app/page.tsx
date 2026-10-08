@@ -5,43 +5,19 @@ import { useRef } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import {
-  ArrowUpRight,
-  Brain,
-  Cpu,
-  Mail,
-  Orbit,
-  Sparkles,
-  Waves,
-} from "lucide-react"
+import { ArrowUpRight, Brain, Mail } from "lucide-react"
 import GlowHero from "@/components/ui/hero-1"
-import { WheelCarousel } from "@/components/ui/wheel-carousel"
-import { skillWheelItems } from "@/lib/lab"
+import { SkillOrbit } from "@/components/Lab/SkillOrbit"
+import { labDisciplines } from "@/lib/lab"
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
-const disciplines = [
-  {
-    title: "Systems",
-    detail: "IoT, embedded boards, and hardware that talks to the world.",
-    icon: Cpu,
-  },
-  {
-    title: "Intelligence",
-    detail: "Software, AI, and automation that compounds effort.",
-    icon: Sparkles,
-  },
-  {
-    title: "Mechanics",
-    detail: "Robots, motion, and control loops that move matter.",
-    icon: Waves,
-  },
-  {
-    title: "Flight",
-    detail: "Aerospace thinking — structures, sensing, and avionics.",
-    icon: Orbit,
-  },
-]
+const homeDisciplines = labDisciplines.slice(0, 4).map((d) => ({
+  title: d.title,
+  detail: d.summary,
+  href: d.href,
+  icon: d.icon,
+}))
 
 export default function Home() {
   const container = useRef<HTMLDivElement>(null)
@@ -75,9 +51,8 @@ export default function Home() {
   return (
     <div
       ref={container}
-      className="min-h-screen bg-[#050505] text-white selection:bg-white/20 overflow-x-hidden"
+      className="min-h-[100svh] bg-[#050505] text-white selection:bg-white/20 overflow-x-hidden"
     >
-      {/* Hero — first viewport */}
       <section
         id="lab-hero"
         className="hero-stage relative flex min-h-[100svh] flex-col items-center justify-center px-6"
@@ -92,76 +67,49 @@ export default function Home() {
           glowTextSize="xl"
           className="relative z-10"
         />
-        <p className="relative z-10 mt-6 max-w-md text-center text-sm leading-relaxed text-neutral-400 tracking-wide">
+        <p className="relative z-10 mt-6 max-w-md text-center text-sm leading-relaxed tracking-wide text-neutral-400">
           Systems · Software · Mechanics · Inquiry — one lab, many surfaces.
         </p>
       </section>
 
-      {/* Disciplines */}
-      <section className="discipline-grid mx-auto max-w-6xl px-4 pb-24 pt-8 md:px-8">
+      <section className="discipline-grid mx-auto max-w-6xl px-4 pb-20 pt-8 md:px-8">
         <div className="mb-10 flex items-end justify-between gap-4 border-b border-white/10 pb-4">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.28em] text-neutral-500">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-neutral-500 sm:text-[11px]">
               Disciplines
             </p>
-            <h2 className="mt-2 text-3xl font-medium tracking-tight md:text-4xl">
+            <h2 className="mt-2 text-2xl font-medium tracking-tight sm:text-3xl md:text-4xl">
               Where the work overlaps
             </h2>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-px bg-white/10 md:grid-cols-2">
-          {disciplines.map(({ title, detail, icon: Icon }) => (
-            <article
+          {homeDisciplines.map(({ title, detail, href, icon: Icon }) => (
+            <Link
               key={title}
-              className="discipline-card group bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
+              href={href}
+              className="discipline-card group bg-[#050505] p-6 transition-colors hover:bg-white/[0.03] sm:p-8"
             >
-              <Icon className="mb-6 text-neutral-400 transition-colors group-hover:text-white" size={22} />
-              <h3 className="text-2xl font-medium tracking-tight">{title}</h3>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-neutral-500">
-                {detail}
-              </p>
-            </article>
+              <Icon
+                className="mb-6 text-neutral-400 transition-colors group-hover:text-white"
+                size={22}
+              />
+              <h3 className="text-xl font-medium tracking-tight sm:text-2xl">{title}</h3>
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-neutral-500">{detail}</p>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* Skills wheel — limited height, scrollable interaction */}
-      <section className="mx-auto max-w-6xl px-4 pb-28 md:px-8">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.28em] text-neutral-500">
-              Skills
-            </p>
-            <h2 className="mt-2 text-3xl font-medium tracking-tight">
-              Scroll the orbit
-            </h2>
-          </div>
-          <p className="hidden max-w-xs text-right text-xs text-neutral-500 md:block">
-            Drag or scroll — limited stage, full catalog.
-          </p>
-        </div>
-        <div className="h-[min(70vh,560px)] overflow-hidden rounded-none border border-white/15">
-          <WheelCarousel
-            items={skillWheelItems}
-            mode="dark"
-            photoSide="left"
-            photoWidth={38}
-            photoAspect="4/3"
-            photoRadius={0}
-            contentWidth={1100}
-            visibleItems={5}
-            edgeFadeSize={22}
-            className="min-h-0"
-          />
-        </div>
-      </section>
+      <div className="pb-24">
+        <SkillOrbit />
+      </div>
 
-      {/* Portal links */}
-      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-px bg-white/10 px-0 pb-32 md:grid-cols-3">
+      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-px bg-white/10 md:grid-cols-3">
         <Link
           href="/projects"
-          className="group flex min-h-[200px] flex-col justify-between bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
+          className="group flex min-h-[180px] flex-col justify-between bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
         >
           <ArrowUpRight className="text-neutral-500 transition-colors group-hover:text-white" />
           <div>
@@ -171,7 +119,7 @@ export default function Home() {
         </Link>
         <Link
           href="/brain"
-          className="group flex min-h-[200px] flex-col justify-between bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
+          className="group flex min-h-[180px] flex-col justify-between bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
         >
           <Brain className="text-neutral-500 transition-colors group-hover:text-cyan-400" size={22} />
           <div>
@@ -181,7 +129,7 @@ export default function Home() {
         </Link>
         <a
           href="mailto:hello@bardialabs.com"
-          className="group flex min-h-[200px] flex-col justify-between bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
+          className="group flex min-h-[180px] flex-col justify-between bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
         >
           <Mail className="text-neutral-500 transition-colors group-hover:text-white" size={22} />
           <div>
@@ -191,7 +139,7 @@ export default function Home() {
         </a>
       </section>
 
-      <footer className="border-t border-white/10 py-8">
+      <footer className="bg-[#050505] py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-8 text-[11px] uppercase tracking-[0.22em] text-neutral-600 md:flex-row">
           <p>© {new Date().getFullYear()} Bardlabs</p>
           <p>Laboratory · Not a résumé</p>

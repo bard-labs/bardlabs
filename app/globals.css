@@ -170,10 +170,14 @@
 }
 
 .nav-noise {
+  background-color: rgba(255, 255, 255, 0.04);
   background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-  background-size: 180px 180px;
+  background-size: 140px 140px;
   mix-blend-mode: soft-light;
-  animation: noiseShift 0.35s steps(2) infinite;
+  animation: noiseShift 0.28s steps(2) infinite;
+}
+.nav-cell:hover .nav-noise {
+  background-color: rgba(255, 255, 255, 0.08);
 }
 @keyframes noiseShift {
   0% {

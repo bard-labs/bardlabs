@@ -17,9 +17,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased font-sans bg-[#050505] text-white">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <html lang="en" className="dark bg-[#050505]" suppressHydrationWarning>
+      <body className="min-h-[100svh] bg-[#050505] font-sans text-white antialiased">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} forcedTheme="dark">
           <SmoothScroll />
           <SiteNav />
           {children}
