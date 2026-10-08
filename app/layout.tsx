@@ -1,28 +1,26 @@
-import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata } from "next";
+import "./globals.css";
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import "./globals.css"
+import { DynamicIsland } from "@/components/DynamicIsland";
+import SmoothScroll from "@/components/SmoothScroll";
 
 export const metadata: Metadata = {
   title: "Bardlabs",
-  description: "Ideas, outreach, projects, and SOPs in one place.",
-}
+  description: "Engineering. Curiosity. Evolution.",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster />
-        </ThemeProvider>
+    <html lang="en">
+      <body className="antialiased font-sans bg-neutral-900 text-white">
+        <SmoothScroll />
+        {children}
+        <DynamicIsland />
       </body>
     </html>
-  )
+  );
 }
