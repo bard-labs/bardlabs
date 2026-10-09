@@ -1,190 +1,221 @@
 "use client"
 
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
-import Image from 'next/image';
-
-import { ChevronLeft, Calendar, Tag } from 'lucide-react';
-import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
+import React, { useEffect, useState, useRef } from "react"
+import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
+import { createClient } from "@/utils/supabase/client"
+import { ChevronLeft, Calendar, Tag, ExternalLink, Network } from "lucide-react"
+import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 
 interface Project {
-    id: string;
-    title: string;
-    description: string | null;
-    link: string | null;
-    tags: string[] | null;
-    images: string[] | null;
-    created_at: string;
+  id: string
+  title: string
+  description: string | null
+  link: string | null
+  tags: string[] | null
+  images: string[] | null
+  created_at: string
 }
 
+type DisciplineLink = { discipline_id: string; title: string; subtitle: string }
+
 export default function ProjectDetailPage() {
-    const { id } = useParams();
-    const router = useRouter();
-    const [project, setProject] = useState<Project | null>(null);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const supabase = createClient();
+  const { id } = useParams()
+  const router = useRouter()
+  const [project, setProject] = useState<Project | null>(null)
+  const [disciplines, setDisciplines] = useState<DisciplineLink[]>([])
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const headerRef = useRef<HTMLElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const metaRef = useRef<HTMLDivElement>(null)
+  const supabase = createClient()
 
-    const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchProject = async () => {
+      setLoading(true)
+      const projectId = Array.isArray(id) ? id[0] : id
+      if (!projectId) {
+        setLoading(false)
+        return
+      }
 
-    useEffect(() => {
-        const fetchProject = async () => {
-            setLoading(true);
-            const projectId = Array.isArray(id) ? id[0] : id;
-            if (!projectId) {
-                setLoading(false);
-                return;
-            }
+      const { data, error } = await supabase.from("projects").select("*").eq("id", projectId).single()
+      if (error || !data) {
+        setLoading(false)
+        return
+      }
 
-            try {
-                const { data, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .eq('id', projectId)
-                    .single();
+      const projectData = data as Project
+      setProject(projectData)
+      if (projectData.images?.length) setSelectedImage(projectData.images[0])
 
-                if (error) {
-                    console.error("Error fetching project:", error);
-                    // If invalid UUID or not found, we just stop loading and let the Not Found UI show
-                    setLoading(false);
-                    return;
-                }
+      const { data: mapped } = await supabase
+        .from("project_disciplines")
+        .select("discipline_id, lab_disciplines(title, subtitle)")
+        .eq("project_id", projectId)
 
-                if (data) {
-                    const projectData = data as Project;
-                    setProject(projectData);
-                    if (projectData.images && projectData.images.length > 0) {
-                        setSelectedImage(projectData.images[0]);
-                    }
-                }
-            } catch (err) {
-                console.error("Unexpected error:", err);
-            }
-            setLoading(false);
-        };
-        fetchProject();
-    }, [id, supabase]);
-
-    const headerRef = useRef<HTMLElement>(null);
-    const contentRef = useRef<HTMLDivElement>(null);
-    const metaRef = useRef<HTMLDivElement>(null);
-
-    useGSAP(() => {
-        if (!project || loading) return;
-
-        const tl = gsap.timeline();
-
-        tl.from(headerRef.current, { y: 20, opacity: 0, duration: 0.6, ease: "power3.out" })
-            .from(contentRef.current, { y: 20, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.4")
-            .from(metaRef.current, { x: 20, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.4");
-
-    }, { scope: containerRef, dependencies: [project] });
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-neutral-900 flex items-center justify-center text-white">
-                <div className="animate-pulse">Loading Project...</div>
-            </div>
-        );
+      const linked = ((mapped ?? []) as Array<{
+        discipline_id: string
+        lab_disciplines: { title: string; subtitle: string } | { title: string; subtitle: string }[] | null
+      }>).map((row) => {
+        const d = Array.isArray(row.lab_disciplines) ? row.lab_disciplines[0] : row.lab_disciplines
+        return {
+          discipline_id: row.discipline_id,
+          title: d?.title ?? row.discipline_id,
+          subtitle: d?.subtitle ?? "",
+        }
+      })
+      setDisciplines(linked)
+      setLoading(false)
     }
+    void fetchProject()
+  }, [id, supabase])
 
-    if (!project) {
-        return (
-            <div className="min-h-screen bg-neutral-900 flex flex-col items-center justify-center text-white gap-4">
-                <h2 className="text-2xl font-bold">Project Not Found</h2>
-                <p className="text-neutral-400">The project you are looking for does not exist.</p>
-                <button onClick={() => router.back()} className="px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
-                    Go Back
-                </button>
-            </div>
-        );
-    }
+  useGSAP(
+    () => {
+      if (!project || loading) return
+      const tl = gsap.timeline()
+      tl.from(headerRef.current, { y: 20, opacity: 0, duration: 0.6, ease: "power3.out" })
+        .from(contentRef.current, { y: 20, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.4")
+        .from(metaRef.current, { x: 20, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.4")
+    },
+    { scope: containerRef, dependencies: [project, loading] },
+  )
 
+  if (loading) {
     return (
-        <div className="min-h-screen w-full bg-neutral-900 text-neutral-200 font-sans selection:bg-white/20 pb-32">
-            <div ref={containerRef} className="max-w-5xl mx-auto p-8 pt-20 space-y-12">
+      <div className="flex min-h-screen items-center justify-center bg-[#050505] text-white">
+        <div className="animate-pulse">Loading Project...</div>
+      </div>
+    )
+  }
 
-                <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors mb-8 group"
-                >
-                    <div className="p-2 rounded-full bg-neutral-800 group-hover:bg-neutral-700 transition-colors">
-                        <ChevronLeft size={16} />
-                    </div>
-                    <span className="text-sm font-medium">Back to Universe</span>
-                </button>
+  if (!project) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#050505] text-white">
+        <h2 className="text-2xl font-bold">Project Not Found</h2>
+        <button
+          onClick={() => router.push("/projects")}
+          className="rounded-lg bg-white/10 px-4 py-2 transition-colors hover:bg-white/20"
+        >
+          Back to Archive
+        </button>
+      </div>
+    )
+  }
 
-                <header ref={headerRef} className="space-y-6">
-                    <div className="flex flex-wrap gap-3">
-                        {project.tags?.map(tag => (
-                            <span key={tag} className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-neutral-300">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                    <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-white break-words">{project.title}</h1>
-                </header>
+  const images = (project.images ?? []) as string[]
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    <div ref={contentRef} className="lg:col-span-2 space-y-8 project-content">
-                        {project.images && project.images.length > 0 && (
-                            <div className="space-y-4">
-                                <div className="w-full aspect-video rounded-3xl overflow-hidden bg-neutral-800 border border-white/5 relative">
-                                    <Image
-                                        src={selectedImage || project.images[0]}
-                                        alt={project.title}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                                {project.images.length > 1 && (
-                                    <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
-                                        {project.images.map((img, idx) => (
-                                            <button
-                                                key={idx}
-                                                onClick={() => setSelectedImage(img)}
-                                                className={`relative w-24 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === img ? 'border-purple-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
-                                            >
-                                                <Image src={img} alt={`View ${idx + 1}`} fill className="object-cover" />
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+  return (
+    <div ref={containerRef} className="min-h-screen bg-[#050505] px-4 pb-28 pt-24 text-white sm:px-8">
+      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <button
+            onClick={() => router.push("/projects")}
+            className="mb-8 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-neutral-500 hover:text-white"
+          >
+            <ChevronLeft size={14} /> Archive
+          </button>
 
-                        <div className="prose prose-invert prose-lg max-w-none">
-                            <h3 className="text-2xl font-semibold text-white mb-4">Overview</h3>
-                            <p className="text-neutral-300 leading-relaxed whitespace-pre-wrap break-words">
-                                {project.description}
-                            </p>
-                        </div>
+          <header ref={headerRef}>
+            <h1 className="text-4xl font-medium tracking-tight sm:text-5xl">{project.title}</h1>
+            {project.description ? (
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-400">{project.description}</p>
+            ) : null}
+          </header>
 
-
-                    </div>
-
-                    <div ref={metaRef} className="space-y-6 project-meta">
-                        <div className="p-6 rounded-3xl bg-neutral-800/30 border border-white/5 space-y-4">
-                            <h4 className="font-semibold text-white">Project Details</h4>
-
-                            <div className="flex items-center gap-3 text-neutral-400">
-                                <Calendar size={18} />
-                                <span className="text-sm">Started {new Date(project.created_at).toLocaleDateString()}</span>
-                            </div>
-
-                            <div className="flex items-center gap-3 text-neutral-400">
-                                <Tag size={18} />
-                                <span className="text-sm">{project.tags?.length || 0} Tags</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+          <div ref={contentRef} className="mt-8 space-y-4">
+            <div className="relative aspect-[16/10] overflow-hidden border border-white/10 bg-neutral-900">
+              {selectedImage ? (
+                <Image src={selectedImage} alt={project.title} fill className="object-cover" sizes="(max-width:1024px) 100vw, 66vw" />
+              ) : (
+                <div className="flex h-full items-center justify-center text-neutral-600">No image</div>
+              )}
             </div>
-
-
+            {images.length > 1 ? (
+              <div className="flex gap-2 overflow-x-auto">
+                {images.map((img) => (
+                  <button
+                    key={img}
+                    type="button"
+                    onClick={() => setSelectedImage(img)}
+                    className={`relative h-16 w-24 shrink-0 overflow-hidden border ${selectedImage === img ? "border-white" : "border-white/15"}`}
+                  >
+                    <Image src={img} alt="" fill className="object-cover" sizes="96px" />
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
-    );
+
+        <aside ref={metaRef} className="space-y-6 lg:col-span-4 lg:pt-16">
+          <div className="border border-white/10 p-5">
+            <p className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+              <Calendar size={12} /> Created
+            </p>
+            <p className="text-sm text-neutral-300">
+              {new Date(project.created_at).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
+
+          {project.tags?.length ? (
+            <div className="border border-white/10 p-5">
+              <p className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                <Tag size={12} /> Tags
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {project.tags.map((tag) => (
+                  <span key={tag} className="rounded-full border border-white/10 px-2 py-1 text-[10px] uppercase tracking-wider text-neutral-400">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {disciplines.length ? (
+            <div className="border border-white/10 p-5">
+              <p className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                <Network size={12} /> Lab fields
+              </p>
+              <ul className="space-y-2">
+                {disciplines.map((d) => (
+                  <li key={d.discipline_id}>
+                    <Link href={`/lab/${d.discipline_id}`} className="text-sm text-white hover:underline">
+                      {d.title}
+                    </Link>
+                    <p className="text-xs text-neutral-500">{d.subtitle}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {project.link ? (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 border border-white bg-white px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-neutral-200"
+            >
+              Open project <ExternalLink size={14} />
+            </a>
+          ) : null}
+
+          <Link href="/map" className="block text-center text-xs uppercase tracking-[0.18em] text-neutral-500 hover:text-white">
+            See connection map
+          </Link>
+        </aside>
+      </div>
+    </div>
+  )
 }

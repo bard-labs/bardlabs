@@ -40,6 +40,31 @@ export const ProjectEditor = () => {
         run();
     }, [fetchData]);
 
+    const syncTreeNode = async (project: { id: string; title: string; description?: string | null; link?: string | null }) => {
+        const archiveFolder = '11111111-1111-1111-1111-111111111104'
+        const { data: existing } = await supabase
+            .from('lab_nodes')
+            .select('id')
+            .eq('kind', 'project')
+            .eq('ref_id', project.id)
+            .maybeSingle()
+
+        const nodePayload = {
+            parent_id: archiveFolder,
+            kind: 'project' as const,
+            title: project.title,
+            summary: project.description || null,
+            href: `/projects/${project.id}`,
+            ref_id: project.id,
+        }
+
+        if (existing?.id) {
+            await supabase.from('lab_nodes').update(nodePayload).eq('id', existing.id)
+        } else {
+            await supabase.from('lab_nodes').insert({ ...nodePayload, sort_order: Date.now() % 100000 })
+        }
+    }
+
     const handleSave = async () => {
         if (!formData.title) return;
 
@@ -53,8 +78,12 @@ export const ProjectEditor = () => {
 
         if (editingId) {
             await supabase.from('projects').update(payload).eq('id', editingId);
+            await syncTreeNode({ id: editingId, ...payload });
         } else {
-            await supabase.from('projects').insert([payload]);
+            const { data } = await supabase.from('projects').insert([payload]).select('id').single();
+            if (data?.id) {
+                await syncTreeNode({ id: data.id, ...payload });
+            }
         }
 
         resetForm();
@@ -66,6 +95,7 @@ export const ProjectEditor = () => {
             // Optimistic update
             setProjects(prev => prev.filter(p => p.id !== id));
 
+            await supabase.from('lab_nodes').delete().eq('kind', 'project').eq('ref_id', id)
             const { error } = await supabase.from('projects').delete().eq('id', id);
 
             if (error) {
