@@ -153,16 +153,13 @@ export function SiteNav() {
 
         <div ref={cellsRef} className="relative h-full w-full p-2 sm:p-3 md:p-4">
           {showBrandPanel ? (
-            <div className="grid h-full grid-cols-12 grid-rows-3 gap-0 border border-white/20">
+            <div className="nav-grid-3d grid h-full grid-cols-12 grid-rows-3 gap-0 border border-white/20">
               <div className="nav-cell group relative col-span-4 border-b border-r border-white/20 md:col-span-3">
-                <NoiseHover />
-              </div>
+                              </div>
               <div className="nav-cell group relative col-span-4 border-b border-r border-white/20 md:col-span-6">
-                <NoiseHover />
-              </div>
+                              </div>
               <div className="nav-cell group relative col-span-4 border-b border-white/20 md:col-span-3">
-                <NoiseHover />
-              </div>
+                              </div>
 
               <button
                 type="button"
@@ -171,8 +168,7 @@ export function SiteNav() {
                 disabled={panel === 0}
                 aria-label="Back to brand panel"
               >
-                <NoiseHover />
-                <ChevronLeft
+                                <ChevronLeft
                   className={`nav-cell-label relative z-10 h-7 w-7 sm:h-9 sm:w-9 ${panel === 0 ? "text-white/20" : "text-white"}`}
                   strokeWidth={1.25}
                 />
@@ -183,8 +179,7 @@ export function SiteNav() {
                 className="nav-cell group relative col-span-8 flex flex-col items-center justify-center border-b border-r border-white/20 md:col-span-8"
                 onClick={() => setOpen(false)}
               >
-                <NoiseHover />
-                <div className="nav-cell-label relative z-10 px-2 text-center">
+                                <div className="nav-cell-label relative z-10 px-2 text-center">
                   <p className="text-[clamp(1.6rem,9vw,7rem)] font-semibold leading-none tracking-[-0.06em] text-white">
                     BARDLABS
                   </p>
@@ -200,8 +195,7 @@ export function SiteNav() {
                 onClick={() => setPanel(1)}
                 aria-label="Open lab index"
               >
-                <NoiseHover />
-                <ChevronRight
+                                <ChevronRight
                   className="nav-cell-label relative z-10 h-7 w-7 text-white sm:h-9 sm:w-9"
                   strokeWidth={1.25}
                 />
@@ -212,8 +206,7 @@ export function SiteNav() {
                 className="nav-cell group relative col-span-6 flex items-end border-r border-white/20 p-3 sm:p-5 md:col-span-6"
                 onClick={() => setOpen(false)}
               >
-                <NoiseHover />
-                <div className="nav-cell-label relative z-10">
+                                <div className="nav-cell-label relative z-10">
                   <p className="text-base font-medium tracking-tight sm:text-lg">Archive</p>
                   <p className="text-[10px] text-neutral-500 sm:text-xs">Project Universe</p>
                 </div>
@@ -223,8 +216,7 @@ export function SiteNav() {
                 className="nav-cell group relative col-span-6 flex items-end p-3 sm:p-5"
                 onClick={() => setOpen(false)}
               >
-                <NoiseHover />
-                <div className="nav-cell-label relative z-10">
+                                <div className="nav-cell-label relative z-10">
                   <p className="text-base font-medium tracking-tight sm:text-lg">Brain</p>
                   <p className="text-[10px] text-neutral-500 sm:text-xs">Knowledge map</p>
                 </div>
@@ -234,7 +226,7 @@ export function SiteNav() {
 
           {showIndexPanel ? (
             <div
-              className={`grid h-full grid-cols-12 auto-rows-fr gap-0 border border-white/20 ${showBrandPanel ? "hidden" : ""}`}
+              className={`nav-grid-3d grid h-full grid-cols-12 auto-rows-fr gap-0 border border-white/20 ${showBrandPanel ? "hidden" : ""}`}
             >
               {showHeroChrome ? (
                 <button
@@ -243,8 +235,7 @@ export function SiteNav() {
                   onClick={() => setPanel(0)}
                   aria-label="Back to brand panel"
                 >
-                  <NoiseHover />
-                  <ChevronLeft className="nav-cell-label relative z-10 h-5 w-5 text-white" />
+                                    <ChevronLeft className="nav-cell-label relative z-10 h-5 w-5 text-white" />
                   <span className="nav-cell-label relative z-10 text-[10px] uppercase tracking-[0.22em] text-neutral-400 sm:text-xs">
                     Bardlabs
                   </span>
@@ -258,8 +249,7 @@ export function SiteNav() {
                   className={`nav-cell group relative flex min-h-[14vh] flex-col justify-end border border-white/15 p-3 sm:min-h-[18vh] sm:p-5 md:min-h-0 ${cell.span}`}
                   onClick={() => setOpen(false)}
                 >
-                  <NoiseHover />
-                  <div className="nav-cell-label relative z-10">
+                                    <div className="nav-cell-label relative z-10">
                     <p className="text-base font-medium tracking-tight sm:text-xl md:text-2xl">
                       {cell.title}
                     </p>
@@ -277,11 +267,3 @@ export function SiteNav() {
   )
 }
 
-function NoiseHover() {
-  return (
-    <span
-      aria-hidden
-      className="nav-noise pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-    />
-  )
-}

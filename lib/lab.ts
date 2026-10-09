@@ -108,6 +108,13 @@ export const labNavCells: LabLink[] = [
     span: "col-span-4 md:col-span-4",
   },
   {
+    id: "map",
+    title: "Connections",
+    subtitle: "Dot map · Filetree",
+    href: "/map",
+    span: "col-span-4 md:col-span-4",
+  },
+  {
     id: "brain",
     title: "Brain",
     subtitle: "Knowledge map",

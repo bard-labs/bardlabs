@@ -1,8 +1,11 @@
-import React, { useState, useRef } from 'react';
-import { ArrowLeft, Instagram, Twitter, Mail, Send, Check, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowLeft, Linkedin, Twitter, Mail, Send, Check, Loader2, Github } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
+import { createClient } from '@/utils/supabase/client';
+
+type SocialLink = { id: string; label: string; url: string }
 
 export const ContactForm = ({ onBack, onModeChange }: { onBack: () => void, onModeChange: (mode: 'socials' | 'form') => void }) => {
     const [mode, setMode] = useState<'socials' | 'form'>('socials');
@@ -10,7 +13,21 @@ export const ContactForm = ({ onBack, onModeChange }: { onBack: () => void, onMo
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(false);
     const [token, setToken] = useState<string | null>(null);
+    const [socials, setSocials] = useState<SocialLink[]>([]);
     const turnstileRef = useRef<TurnstileInstance>(null);
+
+    useEffect(() => {
+        const load = async () => {
+            const supabase = createClient();
+            const { data } = await supabase
+                .from('site_links')
+                .select('id, label, url')
+                .in('id', ['linkedin', 'x', 'github', 'email'])
+                .order('sort_order');
+            if (data?.length) setSocials(data as SocialLink[]);
+        };
+        void load();
+    }, []);
 
     const handleSubmit = async () => {
         if (!formData.message || !formData.email) {
@@ -79,15 +96,26 @@ export const ContactForm = ({ onBack, onModeChange }: { onBack: () => void, onMo
                 </div>
 
                 <div className="flex gap-2 justify-center mb-4">
-                    <a href="https://instagram.com" target="_blank" rel="noreferrer" className="p-3 bg-white/5 rounded-full hover:bg-white/20 transition-colors text-pink-400">
-                        <Instagram size={20} />
-                    </a>
-                    <a href="https://twitter.com" target="_blank" rel="noreferrer" className="p-3 bg-white/5 rounded-full hover:bg-white/20 transition-colors text-blue-400">
-                        <Twitter size={20} />
-                    </a>
-                    <a href="mailto:hello@bardalabs.com" className="p-3 bg-white/5 rounded-full hover:bg-white/20 transition-colors text-green-400">
-                        <Mail size={20} />
-                    </a>
+                    {(socials.length ? socials : [
+                        { id: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/in/bardiamardan' },
+                        { id: 'x', label: 'X', url: 'https://x.com/bardiamardan' },
+                        { id: 'email', label: 'Email', url: 'mailto:hello@bardialabs.com' },
+                    ]).map((link) => {
+                        const Icon = link.id === 'linkedin' ? Linkedin : link.id === 'github' ? Github : link.id === 'email' ? Mail : Twitter;
+                        const color = link.id === 'linkedin' ? 'text-sky-400' : link.id === 'github' ? 'text-neutral-200' : link.id === 'email' ? 'text-green-400' : 'text-blue-400';
+                        return (
+                            <a
+                                key={link.id}
+                                href={link.url}
+                                target={link.url.startsWith('http') ? '_blank' : undefined}
+                                rel="noreferrer"
+                                className={`p-3 bg-white/5 rounded-full hover:bg-white/20 transition-colors ${color}`}
+                                aria-label={link.label}
+                            >
+                                <Icon size={20} />
+                            </a>
+                        );
+                    })}
                 </div>
 
                 <button

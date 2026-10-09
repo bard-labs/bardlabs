@@ -106,7 +106,7 @@ export default function Home() {
         <SkillOrbit />
       </div>
 
-      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-px bg-white/10 md:grid-cols-3">
+      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-px bg-white/10 md:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/projects"
           className="group flex min-h-[180px] flex-col justify-between bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
@@ -115,6 +115,16 @@ export default function Home() {
           <div>
             <h3 className="text-2xl font-medium tracking-tight">Archive</h3>
             <p className="mt-2 text-sm text-neutral-500">Project Universe</p>
+          </div>
+        </Link>
+        <Link
+          href="/map"
+          className="group flex min-h-[180px] flex-col justify-between bg-[#050505] p-8 transition-colors hover:bg-white/[0.03]"
+        >
+          <ArrowUpRight className="text-neutral-500 transition-colors group-hover:text-violet-300" />
+          <div>
+            <h3 className="text-2xl font-medium tracking-tight">Connections</h3>
+            <p className="mt-2 text-sm text-neutral-500">Filetree of the lab</p>
           </div>
         </Link>
         <Link
