@@ -48,7 +48,7 @@ export const DynamicIsland = () => {
     // --- Configuration ---
     const targetDimensions = useMemo(() => {
         if (viewState === 'idle') return { width: 120, height: 40, borderRadius: 24 };
-        if (viewState === 'menu') return { width: 360, height: 200, borderRadius: 32 }; // Taller for extra row
+        if (viewState === 'menu') return { width: 360, height: 240, borderRadius: 32 };
 
         if (activeDetail === 'contact') {
             if (contactMode === 'socials') return { width: 360, height: 260, borderRadius: 32 };
@@ -161,6 +161,7 @@ export const DynamicIsland = () => {
             else if (label === 'Logs') router.push('/log');
             else if (label === 'Projects') router.push('/projects');
             else if (label === 'Brain') router.push('/brain');
+            else if (label === 'Map') router.push('/map');
             else if (label === 'Admin') router.push('/dashboard');
         }, 300); // Wait for island to shrink back to idle
     };

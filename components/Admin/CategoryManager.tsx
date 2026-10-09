@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { Plus, Trash2, Tag } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Category = {
     id: string;
@@ -112,26 +113,28 @@ export const CategoryManager = () => {
             </div>
 
             {/* List */}
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {categories.map((cat) => (
-                    <div key={cat.id} className="category-item flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
-                        <div className="flex items-center gap-3">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                            <span className="font-medium">{cat.name}</span>
-                            <span className="text-[10px] uppercase tracking-wider opacity-50 bg-white/10 px-2 py-0.5 rounded-md">{cat.type}</span>
+            <ScrollArea className="h-[300px] pr-2">
+                <div className="space-y-2">
+                    {categories.map((cat) => (
+                        <div key={cat.id} className="category-item group flex items-center justify-between rounded-xl border border-white/5 bg-white/5 p-3 transition-colors hover:bg-white/10">
+                            <div className="flex items-center gap-3">
+                                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: cat.color }} />
+                                <span className="font-medium">{cat.name}</span>
+                                <span className="rounded-md bg-white/10 px-2 py-0.5 text-[10px] tracking-wider uppercase opacity-50">{cat.type}</span>
+                            </div>
+                            <button
+                                onClick={() => handleDelete(cat.id)}
+                                className="text-red-400 opacity-0 transition-all group-hover:opacity-100 hover:text-red-300"
+                            >
+                                <Trash2 size={16} />
+                            </button>
                         </div>
-                        <button
-                            onClick={() => handleDelete(cat.id)}
-                            className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-all"
-                        >
-                            <Trash2 size={16} />
-                        </button>
-                    </div>
-                ))}
-                {categories.length === 0 && !loading && (
-                    <p className="text-neutral-500 text-center text-sm py-4">No categories yet.</p>
-                )}
-            </div>
+                    ))}
+                    {categories.length === 0 && !loading ? (
+                        <p className="py-4 text-center text-sm text-neutral-500">No data found</p>
+                    ) : null}
+                </div>
+            </ScrollArea>
         </div>
     );
 };

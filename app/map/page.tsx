@@ -1,5 +1,7 @@
 import Link from "next/link"
 import { ArrowLeft, ChevronRight, FileText, Folder, Link2, Network } from "lucide-react"
+import { FeatureOff } from "@/components/FeatureOff"
+import { isFeatureEnabled } from "@/lib/features-data"
 import { fetchLabTree, fetchSiteLinks, type LabNode } from "@/lib/lab-data"
 
 type TreeNode = LabNode & { children: TreeNode[] }
@@ -73,6 +75,10 @@ export const metadata = {
 }
 
 export default async function MapPage() {
+  if (!(await isFeatureEnabled("map"))) {
+    return <FeatureOff title="Offline" featureLabel="Connections" />
+  }
+
   const [nodes, links] = await Promise.all([fetchLabTree(), fetchSiteLinks()])
   const tree = buildTree(nodes)
 
@@ -116,7 +122,7 @@ export default async function MapPage() {
 
         <section className="mt-12 overflow-hidden border border-white/15">
           {tree.length === 0 ? (
-            <p className="p-6 text-sm text-neutral-500">Tree is empty — seed it from the dashboard.</p>
+            <p className="p-6 text-sm text-neutral-500">No data found</p>
           ) : (
             tree.map((node) => <NodeRow key={node.id} node={node} />)
           )}

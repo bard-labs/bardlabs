@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Trash2, Image as ImageIcon, Save, Edit2 } from 'lucide-react';
 import Image from 'next/image';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Project = {
     id: string;
@@ -224,26 +225,31 @@ export const ProjectEditor = () => {
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
-                {projects.map(p => (
-                    <div key={p.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-medium truncate">{p.title}</h3>
+            <ScrollArea className="min-h-0 flex-1 pr-2">
+                <div className="space-y-2">
+                    {projects.map(p => (
+                        <div key={p.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="font-medium truncate">{p.title}</h3>
+                                </div>
+                                <p className="text-xs text-neutral-500 truncate">{p.description}</p>
                             </div>
-                            <p className="text-xs text-neutral-500 truncate">{p.description}</p>
+                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                                <button onClick={() => handleEdit(p)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400">
+                                    <Edit2 size={16} />
+                                </button>
+                                <button onClick={() => handleDelete(p.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400">
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                            <button onClick={() => handleEdit(p)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400">
-                                <Edit2 size={16} />
-                            </button>
-                            <button onClick={() => handleDelete(p.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400">
-                                <Trash2 size={16} />
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                    {projects.length === 0 ? (
+                        <p className="py-8 text-center text-sm text-neutral-500">No data found</p>
+                    ) : null}
+                </div>
+            </ScrollArea>
         </div>
     );
 };

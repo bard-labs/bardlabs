@@ -13,6 +13,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 type LabNode = {
   id: string
@@ -160,12 +161,12 @@ export function LabTreeEditor() {
         Filetree of how disciplines, projects, and links map together.
       </p>
 
-      <div className="mb-6 max-h-[360px] overflow-y-auto rounded-2xl border border-white/5 bg-black/30 p-2 custom-scrollbar">
+      <ScrollArea className="mb-6 h-[360px] rounded-2xl border border-white/5 bg-black/30 p-2">
         {tree.map((n) => renderNode(n))}
         {tree.length === 0 ? (
-          <p className="p-4 text-sm text-neutral-500">No nodes yet — add a root folder below.</p>
+          <p className="p-4 text-sm text-neutral-500">No data found</p>
         ) : null}
-      </div>
+      </ScrollArea>
 
       <div className="grid gap-2 sm:grid-cols-2">
         <select

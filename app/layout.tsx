@@ -1,10 +1,8 @@
 import type { Metadata } from "next"
 import "./globals.css"
 
-import { DynamicIsland } from "@/components/DynamicIsland"
-import { SiteNav } from "@/components/Nav/SiteNav"
+import { AppChrome } from "@/components/AppChrome"
 import { ThemeProvider } from "@/components/providers/theme-provider"
-import SmoothScroll from "@/components/SmoothScroll"
 
 export const metadata: Metadata = {
   title: "Bardlabs",
@@ -20,10 +18,7 @@ export default function RootLayout({
     <html lang="en" className="dark bg-[#050505]" suppressHydrationWarning>
       <body className="min-h-[100svh] bg-[#050505] font-sans text-white antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} forcedTheme="dark">
-          <SmoothScroll />
-          <SiteNav />
-          {children}
-          <DynamicIsland />
+          <AppChrome>{children}</AppChrome>
         </ThemeProvider>
       </body>
     </html>

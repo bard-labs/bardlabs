@@ -180,6 +180,33 @@ export type Database = {
                 }
                 Relationships: []
             }
+            site_features: {
+                Row: {
+                    id: string
+                    label: string
+                    path: string
+                    enabled: boolean
+                    sort_order: number
+                    updated_at: string
+                }
+                Insert: {
+                    id: string
+                    label: string
+                    path: string
+                    enabled?: boolean
+                    sort_order?: number
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    label?: string
+                    path?: string
+                    enabled?: boolean
+                    sort_order?: number
+                    updated_at?: string
+                }
+                Relationships: []
+            }
             project_disciplines: {
                 Row: {
                     project_id: string
