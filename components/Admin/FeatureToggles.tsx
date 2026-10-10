@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
 import { createClient } from "@/utils/supabase/client"
 import { Switch } from "@/components/ui/switch"
 import { FEATURE_DEFAULTS, type FeatureId, type SiteFeature } from "@/lib/features"
@@ -8,12 +9,19 @@ import { FEATURE_DEFAULTS, type FeatureId, type SiteFeature } from "@/lib/featur
 export function FeatureToggles() {
   const supabase = createClient()
   const [features, setFeatures] = useState<SiteFeature[]>(FEATURE_DEFAULTS)
+  const [pending, setPending] = useState<FeatureId | null>(null)
 
   const load = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("site_features")
       .select("id, label, path, enabled, sort_order")
       .order("sort_order")
+
+    if (error) {
+      toast.error("Could not load features", { description: error.message })
+      return
+    }
+
     if (data?.length) {
       setFeatures(
         FEATURE_DEFAULTS.map((def) => {
@@ -37,15 +45,44 @@ export function FeatureToggles() {
   }, [load])
 
   const toggle = async (id: FeatureId, enabled: boolean) => {
-    setFeatures((prev) => prev.map((f) => (f.id === id ? { ...f, enabled } : f)))
-    await supabase.from("site_features").upsert({
-      id,
-      label: FEATURE_DEFAULTS.find((f) => f.id === id)?.label ?? id,
-      path: FEATURE_DEFAULTS.find((f) => f.id === id)?.path ?? `/${id}`,
-      enabled,
-      sort_order: FEATURE_DEFAULTS.find((f) => f.id === id)?.sort_order ?? 0,
-      updated_at: new Date().toISOString(),
-    })
+    const prev = features
+    setFeatures((p) => p.map((f) => (f.id === id ? { ...f, enabled } : f)))
+    setPending(id)
+
+    const label = FEATURE_DEFAULTS.find((f) => f.id === id)?.label ?? id
+    const path = FEATURE_DEFAULTS.find((f) => f.id === id)?.path ?? `/${id}`
+    const sort_order = FEATURE_DEFAULTS.find((f) => f.id === id)?.sort_order ?? 0
+    const updated_at = new Date().toISOString()
+
+    // Prefer UPDATE (seeded rows exist). Fall back to INSERT only if missing.
+    const { data: updated, error: updateError } = await supabase
+      .from("site_features")
+      .update({ enabled, label, path, sort_order, updated_at })
+      .eq("id", id)
+      .select("id")
+
+    let error = updateError
+    if (!error && (!updated || updated.length === 0)) {
+      const insert = await supabase.from("site_features").insert({
+        id,
+        label,
+        path,
+        enabled,
+        sort_order,
+        updated_at,
+      })
+      error = insert.error
+    }
+
+    setPending(null)
+
+    if (error) {
+      setFeatures(prev)
+      toast.error(`${label} not updated`, { description: error.message })
+      return
+    }
+
+    toast.success(enabled ? `${label} is on` : `${label} is off`)
   }
 
   return (
@@ -63,6 +100,7 @@ export function FeatureToggles() {
             </div>
             <Switch
               checked={feature.enabled}
+              disabled={pending === feature.id}
               onCheckedChange={(checked) => void toggle(feature.id, checked)}
               aria-label={`Toggle ${feature.label}`}
             />

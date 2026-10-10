@@ -48,7 +48,7 @@ export const DynamicIsland = () => {
     // --- Configuration ---
     const targetDimensions = useMemo(() => {
         if (viewState === 'idle') return { width: 120, height: 40, borderRadius: 24 };
-        if (viewState === 'menu') return { width: 360, height: 240, borderRadius: 32 };
+        if (viewState === 'menu') return { width: 360, height: 220, borderRadius: 32 };
 
         if (activeDetail === 'contact') {
             if (contactMode === 'socials') return { width: 360, height: 260, borderRadius: 32 };
@@ -158,7 +158,6 @@ export const DynamicIsland = () => {
         // 2. Wait for close animation to finish before navigating (optional, but feels smoother)
         setTimeout(() => {
             if (label === 'Home') router.push('/');
-            else if (label === 'Logs') router.push('/log');
             else if (label === 'Projects') router.push('/projects');
             else if (label === 'Brain') router.push('/brain');
             else if (label === 'Map') router.push('/map');

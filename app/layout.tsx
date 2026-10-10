@@ -3,6 +3,7 @@ import "./globals.css"
 
 import { AppChrome } from "@/components/AppChrome"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
   title: "Bardlabs",
@@ -19,6 +20,7 @@ export default function RootLayout({
       <body className="min-h-[100svh] bg-[#050505] font-sans text-white antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} forcedTheme="dark">
           <AppChrome>{children}</AppChrome>
+          <Toaster position="bottom-right" richColors closeButton theme="dark" />
         </ThemeProvider>
       </body>
     </html>

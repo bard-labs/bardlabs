@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Trash2, Image as ImageIcon, Save, Edit2 } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Project = {
@@ -67,7 +68,10 @@ export const ProjectEditor = () => {
     }
 
     const handleSave = async () => {
-        if (!formData.title) return;
+        if (!formData.title) {
+            toast.error('Title is required');
+            return;
+        }
 
         const payload = {
             title: formData.title,
@@ -78,13 +82,23 @@ export const ProjectEditor = () => {
         };
 
         if (editingId) {
-            await supabase.from('projects').update(payload).eq('id', editingId);
+            const { error } = await supabase.from('projects').update(payload).eq('id', editingId);
+            if (error) {
+                toast.error('Update failed', { description: error.message });
+                return;
+            }
             await syncTreeNode({ id: editingId, ...payload });
+            toast.success('Project updated');
         } else {
-            const { data } = await supabase.from('projects').insert([payload]).select('id').single();
+            const { data, error } = await supabase.from('projects').insert([payload]).select('id').single();
+            if (error) {
+                toast.error('Could not add project', { description: error.message });
+                return;
+            }
             if (data?.id) {
                 await syncTreeNode({ id: data.id, ...payload });
             }
+            toast.success('Project added');
         }
 
         resetForm();
@@ -92,20 +106,19 @@ export const ProjectEditor = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Are you sure?')) {
-            // Optimistic update
-            setProjects(prev => prev.filter(p => p.id !== id));
+        if (!confirm('Are you sure?')) return;
 
-            await supabase.from('lab_nodes').delete().eq('kind', 'project').eq('ref_id', id)
-            const { error } = await supabase.from('projects').delete().eq('id', id);
+        setProjects(prev => prev.filter(p => p.id !== id));
 
-            if (error) {
-                console.error('Error deleting project:', error);
-                alert('Failed to delete project. It might be referenced by other items.');
-                // Revert optimistic update
-                fetchData();
-            }
+        await supabase.from('lab_nodes').delete().eq('kind', 'project').eq('ref_id', id)
+        const { error } = await supabase.from('projects').delete().eq('id', id);
+
+        if (error) {
+            toast.error('Delete failed', { description: error.message });
+            fetchData();
+            return;
         }
+        toast.success('Project deleted');
     };
 
     const handleEdit = (project: Project) => {
@@ -141,9 +154,10 @@ export const ProjectEditor = () => {
         const { error: uploadError } = await supabase.storage.from('portfolio').upload(filePath, file);
 
         if (uploadError) {
-            alert('Error uploading image: ' + uploadError.message);
+            toast.error('Image upload failed', { description: uploadError.message });
             return;
         }
+        toast.success('Image uploaded');
 
         const { data } = supabase.storage.from('portfolio').getPublicUrl(filePath);
         if (data) {

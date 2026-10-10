@@ -1,6 +1,6 @@
 "use client"
 import React, { useMemo, useRef } from "react"
-import { Home, Folder, FileText, Brain, Mail, Network } from "lucide-react"
+import { Home, Folder, Brain, Mail, Network } from "lucide-react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import { useSiteFeatures } from "@/hooks/use-site-features"
@@ -97,7 +97,6 @@ const FEATURE_ITEMS: {
   { icon: <Home size={20} />, label: "Home", navigate: "Home" },
   { feature: "projects", icon: <Folder size={20} />, label: "Projects", navigate: "Projects" },
   { feature: "map", icon: <Network size={20} />, label: "Map", navigate: "Map" },
-  { feature: "logs", icon: <FileText size={20} />, label: "Logs", navigate: "Logs" },
   { feature: "brain", icon: <Brain size={20} />, label: "Brain", navigate: "Brain" },
 ]
 

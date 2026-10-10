@@ -88,12 +88,15 @@ export default function Dashboard() {
 
         <div className="mx-auto hidden max-w-6xl px-4 pb-3 sm:px-6 md:block">
           <Tabs value={tab} onValueChange={setTab}>
-            <TabsList variant="line" className="h-auto w-full justify-start gap-1 overflow-x-auto bg-transparent p-0">
+            <TabsList
+              variant="line"
+              className="h-9 max-h-9 w-full justify-start gap-1 overflow-x-auto overflow-y-hidden bg-transparent p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
               {TABS.map((item) => (
                 <TabsTrigger
                   key={item.value}
                   value={item.value}
-                  className="rounded-none px-3 py-2 text-xs tracking-wide text-neutral-500 data-[state=active]:text-white"
+                  className="shrink-0 rounded-none px-3 py-2 text-xs tracking-wide text-neutral-500 data-[state=active]:text-white"
                 >
                   {item.label}
                 </TabsTrigger>

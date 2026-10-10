@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { GitBranch, Save } from "lucide-react"
+import { toast } from "sonner"
 import { labDisciplines } from "@/lib/lab"
 
 type Project = { id: string; title: string }
@@ -43,14 +44,28 @@ export function ProjectDisciplineLinker() {
   }
 
   const save = async () => {
-    if (!selectedProject) return
-    await supabase.from("project_disciplines").delete().eq("project_id", selectedProject)
+    if (!selectedProject) {
+      toast.error("Select a project first")
+      return
+    }
+    const { error: delError } = await supabase
+      .from("project_disciplines")
+      .delete()
+      .eq("project_id", selectedProject)
+    if (delError) {
+      toast.error("Could not clear links", { description: delError.message })
+      return
+    }
     if (selected.length) {
-      await supabase.from("project_disciplines").insert(
+      const { error } = await supabase.from("project_disciplines").insert(
         selected.map((discipline_id) => ({ project_id: selectedProject, discipline_id })),
       )
+      if (error) {
+        toast.error("Could not save links", { description: error.message })
+        return
+      }
     }
-    alert("Links saved")
+    toast.success("Discipline links saved")
   }
 
   return (

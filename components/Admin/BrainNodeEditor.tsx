@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Trash2, Brain, Save, Edit2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 type BrainNode = {
@@ -52,20 +53,33 @@ export const BrainNodeEditor = () => {
     }, [fetchData]);
 
     const handleSave = async () => {
-        if (!formData.label || !formData.category_id) return;
+        if (!formData.label || !formData.category_id) {
+            toast.error('Label and category are required');
+            return;
+        }
 
         const payload = {
             label: formData.label,
             description: formData.description,
             category_id: formData.category_id,
             parent_id: formData.parent_id || null,
-            position: { x: 0, y: 0, z: 0 } // Default position, will be handled by visualization later
+            position: { x: 0, y: 0, z: 0 }
         };
 
         if (editingId) {
-            await supabase.from('brain_nodes').update(payload).eq('id', editingId);
+            const { error } = await supabase.from('brain_nodes').update(payload).eq('id', editingId);
+            if (error) {
+                toast.error('Update failed', { description: error.message });
+                return;
+            }
+            toast.success('Brain node updated');
         } else {
-            await supabase.from('brain_nodes').insert([payload]);
+            const { error } = await supabase.from('brain_nodes').insert([payload]);
+            if (error) {
+                toast.error('Could not add node', { description: error.message });
+                return;
+            }
+            toast.success('Brain node added');
         }
 
         resetForm();
@@ -73,10 +87,14 @@ export const BrainNodeEditor = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Are you sure?')) {
-            await supabase.from('brain_nodes').delete().eq('id', id);
-            fetchData();
+        if (!confirm('Are you sure?')) return;
+        const { error } = await supabase.from('brain_nodes').delete().eq('id', id);
+        if (error) {
+            toast.error('Delete failed', { description: error.message });
+            return;
         }
+        toast.success('Brain node deleted');
+        fetchData();
     };
 
     const handleEdit = (node: BrainNode) => {

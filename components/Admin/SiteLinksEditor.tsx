@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { Link2, Save, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 type SiteLink = {
   id: string
@@ -27,21 +28,34 @@ export function SiteLinksEditor() {
   }, [fetchData])
 
   const save = async () => {
-    if (!form.id || !form.label || !form.url) return
-    await supabase.from("site_links").upsert({
+    if (!form.id || !form.label || !form.url) {
+      toast.error("Id, label, and URL are required")
+      return
+    }
+    const { error } = await supabase.from("site_links").upsert({
       id: form.id.trim().toLowerCase(),
       label: form.label,
       url: form.url,
       kind: form.kind,
       sort_order: links.length * 10 + 10,
     })
+    if (error) {
+      toast.error("Could not save link", { description: error.message })
+      return
+    }
+    toast.success("Link saved")
     setForm({ id: "", label: "", url: "", kind: "social" })
     fetchData()
   }
 
   const remove = async (id: string) => {
     if (!confirm(`Delete ${id}?`)) return
-    await supabase.from("site_links").delete().eq("id", id)
+    const { error } = await supabase.from("site_links").delete().eq("id", id)
+    if (error) {
+      toast.error("Delete failed", { description: error.message })
+      return
+    }
+    toast.success("Link deleted")
     fetchData()
   }
 

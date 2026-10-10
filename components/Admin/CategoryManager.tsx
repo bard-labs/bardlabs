@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { Plus, Trash2, Tag } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Category = {
@@ -36,30 +37,37 @@ export const CategoryManager = () => {
     }, [fetchCategories]);
 
     const handleAdd = async () => {
-        if (!newCategory.name) return;
+        if (!newCategory.name) {
+            toast.error('Category name is required');
+            return;
+        }
 
         const { error } = await supabase.from('categories').insert([
             { name: newCategory.name, color: newCategory.color, type: newCategory.type }
         ]);
 
-        if (!error) {
-            setNewCategory({ ...newCategory, name: '' });
-            fetchCategories();
+        if (error) {
+            toast.error('Could not add category', { description: error.message });
+            return;
         }
+
+        setNewCategory({ ...newCategory, name: '' });
+        toast.success('Category added');
+        fetchCategories();
     };
 
     const handleDelete = async (id: string) => {
         if (!confirm('Delete this category? This will unlink associated projects/logs.')) return;
 
-        // Unlink related items first to avoid FK constraint
         await supabase.from('brain_nodes').update({ category_id: null }).eq('category_id', id);
 
         const { error } = await supabase.from('categories').delete().eq('id', id);
         if (error) {
-            alert('Error deleting category: ' + error.message);
-        } else {
-            fetchCategories();
+            toast.error('Delete failed', { description: error.message });
+            return;
         }
+        toast.success('Category deleted');
+        fetchCategories();
     };
 
     useGSAP(() => {

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Send, Clock, Eye, Trash2, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 type Log = {
     id: string;
@@ -26,41 +27,38 @@ export const LogEntry = () => {
     };
 
     const handleSubmit = async () => {
-        if (!content) return;
+        if (!content) {
+            toast.error('Log content is required');
+            return;
+        }
         setLoading(true);
 
-        const payload = {
-            content: content
-        };
-
-        const { error } = await supabase.from('logs').insert([payload]);
+        const { error } = await supabase.from('logs').insert([{ content }]);
 
         if (error) {
-            console.error('Error submitting log:', error);
-            alert('Failed to submit log: ' + error.message);
+            toast.error('Could not save log', { description: error.message });
         } else {
             setContent('');
-            // Refresh logs if modal is open
+            toast.success('Log saved');
             if (showModal) fetchLogs();
         }
         setLoading(false);
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Are you sure you want to delete this log?')) {
-            setDeletingId(id);
+        if (!confirm('Are you sure you want to delete this log?')) return;
+        setDeletingId(id);
 
-            const { error } = await supabase.from('logs').delete().eq('id', id);
+        const { error } = await supabase.from('logs').delete().eq('id', id);
 
-            if (error) {
-                console.error('Error deleting log:', error);
-                alert('Failed to delete log.');
-                setDeletingId(null);
-            } else {
-                setLogs(prev => prev.filter(l => l.id !== id));
-                setDeletingId(null);
-            }
+        if (error) {
+            toast.error('Delete failed', { description: error.message });
+            setDeletingId(null);
+            return;
         }
+        setLogs(prev => prev.filter(l => l.id !== id));
+        setDeletingId(null);
+        toast.success('Log deleted');
     };
 
     const openModal = () => {

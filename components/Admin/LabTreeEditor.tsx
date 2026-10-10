@@ -13,6 +13,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react"
+import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 type LabNode = {
@@ -81,8 +82,11 @@ export function LabTreeEditor() {
   const tree = useMemo(() => buildTree(nodes), [nodes])
 
   const addNode = async () => {
-    if (!form.title) return
-    await supabase.from("lab_nodes").insert({
+    if (!form.title) {
+      toast.error("Title is required")
+      return
+    }
+    const { error } = await supabase.from("lab_nodes").insert({
       parent_id: form.parent_id || null,
       kind: form.kind,
       title: form.title,
@@ -90,13 +94,23 @@ export function LabTreeEditor() {
       href: form.href || null,
       sort_order: nodes.length * 10 + 10,
     })
+    if (error) {
+      toast.error("Could not add node", { description: error.message })
+      return
+    }
+    toast.success("Tree node added")
     setForm({ parent_id: form.parent_id, kind: "note", title: "", summary: "", href: "" })
     fetchData()
   }
 
   const removeNode = async (id: string) => {
     if (!confirm("Delete this node and its children?")) return
-    await supabase.from("lab_nodes").delete().eq("id", id)
+    const { error } = await supabase.from("lab_nodes").delete().eq("id", id)
+    if (error) {
+      toast.error("Delete failed", { description: error.message })
+      return
+    }
+    toast.success("Tree node deleted")
     fetchData()
   }
 
