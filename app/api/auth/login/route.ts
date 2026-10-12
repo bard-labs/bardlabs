@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { isAdminEmail } from "@/utils/admin"
+import { authCookieOptions } from "@/utils/supabase/cookie-options"
 
 /**
  * Server-side admin login.
@@ -35,20 +36,9 @@ export async function POST(request: Request) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, {
-              ...options,
-              httpOnly: true,
-              sameSite: "lax",
-              path: "/",
-              secure: process.env.NODE_ENV === "production",
-            })
-            response.cookies.set(name, value, {
-              ...options,
-              httpOnly: true,
-              sameSite: "lax",
-              path: "/",
-              secure: process.env.NODE_ENV === "production",
-            })
+            const opts = authCookieOptions(options)
+            cookieStore.set(name, value, opts)
+            response.cookies.set(name, value, opts)
           })
         },
       },

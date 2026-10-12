@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { createClient } from "@/utils/supabase/client"
 import { Switch } from "@/components/ui/switch"
 import { FEATURE_DEFAULTS, type FeatureId, type SiteFeature } from "@/lib/features"
+import { handleAuthFailure } from "@/lib/auth-session"
 
 export function FeatureToggles() {
   const supabase = createClient()
@@ -18,6 +19,7 @@ export function FeatureToggles() {
       .order("sort_order")
 
     if (error) {
+      if (handleAuthFailure(error)) return
       toast.error("Could not load features", { description: error.message })
       return
     }
@@ -49,6 +51,16 @@ export function FeatureToggles() {
     setFeatures((p) => p.map((f) => (f.id === id ? { ...f, enabled } : f)))
     setPending(id)
 
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      setFeatures(prev)
+      setPending(null)
+      handleAuthFailure({ message: "unauthorized", status: 401 }, "Not signed in")
+      return
+    }
+
     const label = FEATURE_DEFAULTS.find((f) => f.id === id)?.label ?? id
     const path = FEATURE_DEFAULTS.find((f) => f.id === id)?.path ?? `/${id}`
     const sort_order = FEATURE_DEFAULTS.find((f) => f.id === id)?.sort_order ?? 0
@@ -78,6 +90,7 @@ export function FeatureToggles() {
 
     if (error) {
       setFeatures(prev)
+      if (handleAuthFailure(error, `${label} not updated`)) return
       toast.error(`${label} not updated`, { description: error.message })
       return
     }

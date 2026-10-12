@@ -6,6 +6,7 @@ import { Trash2, Image as ImageIcon, Save, Edit2 } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { handleAuthFailure } from '@/lib/auth-session';
 
 type Project = {
     id: string;
@@ -84,6 +85,7 @@ export const ProjectEditor = () => {
         if (editingId) {
             const { error } = await supabase.from('projects').update(payload).eq('id', editingId);
             if (error) {
+                if (handleAuthFailure(error, 'Update failed')) return;
                 toast.error('Update failed', { description: error.message });
                 return;
             }
@@ -92,6 +94,7 @@ export const ProjectEditor = () => {
         } else {
             const { data, error } = await supabase.from('projects').insert([payload]).select('id').single();
             if (error) {
+                if (handleAuthFailure(error, 'Could not add project')) return;
                 toast.error('Could not add project', { description: error.message });
                 return;
             }
