@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { invalidatePublicCache } from '@/lib/public-cache';
 
 type Category = {
     id: string;
@@ -51,6 +52,7 @@ export const CategoryManager = () => {
             return;
         }
 
+        if (newCategory.type === 'brain') await invalidatePublicCache('brain');
         setNewCategory({ ...newCategory, name: '' });
         toast.success('Category added');
         fetchCategories();
@@ -66,6 +68,7 @@ export const CategoryManager = () => {
             toast.error('Delete failed', { description: error.message });
             return;
         }
+        await invalidatePublicCache('brain');
         toast.success('Category deleted');
         fetchCategories();
     };

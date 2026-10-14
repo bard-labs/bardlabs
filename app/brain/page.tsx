@@ -1,5 +1,6 @@
 import { FeatureOff } from "@/components/FeatureOff"
 import { isFeatureEnabled } from "@/lib/features-data"
+import { getPublicBrain } from "@/lib/public-data"
 import { BrainClient } from "./brain-client"
 
 export default async function BrainPage() {
@@ -7,5 +8,6 @@ export default async function BrainPage() {
     return <FeatureOff title="Offline" featureLabel="Brain" />
   }
 
-  return <BrainClient />
+  const brain = await getPublicBrain()
+  return <BrainClient {...brain} />
 }

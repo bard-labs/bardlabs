@@ -76,7 +76,8 @@ export function LabTreeEditor() {
   }, [supabase])
 
   useEffect(() => {
-    void fetchData()
+    const timer = window.setTimeout(() => void fetchData(), 0)
+    return () => window.clearTimeout(timer)
   }, [fetchData])
 
   const tree = useMemo(() => buildTree(nodes), [nodes])

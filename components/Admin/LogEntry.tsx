@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Send, Clock, Eye, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { invalidatePublicCache } from '@/lib/public-cache';
 
 type Log = {
     id: string;
@@ -38,6 +39,7 @@ export const LogEntry = () => {
         if (error) {
             toast.error('Could not save log', { description: error.message });
         } else {
+            await invalidatePublicCache('logs');
             setContent('');
             toast.success('Log saved');
             if (showModal) fetchLogs();
@@ -56,6 +58,7 @@ export const LogEntry = () => {
             setDeletingId(null);
             return;
         }
+        await invalidatePublicCache('logs');
         setLogs(prev => prev.filter(l => l.id !== id));
         setDeletingId(null);
         toast.success('Log deleted');

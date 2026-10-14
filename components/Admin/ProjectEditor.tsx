@@ -5,8 +5,8 @@ import { createClient } from '@/utils/supabase/client';
 import { Trash2, Image as ImageIcon, Save, Edit2 } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { handleAuthFailure } from '@/lib/auth-session';
+import { invalidatePublicCache } from '@/lib/public-cache';
 
 type Project = {
     id: string;
@@ -90,6 +90,7 @@ export const ProjectEditor = () => {
                 return;
             }
             await syncTreeNode({ id: editingId, ...payload });
+            await invalidatePublicCache('projects', editingId);
             toast.success('Project updated');
         } else {
             const { data, error } = await supabase.from('projects').insert([payload]).select('id').single();
@@ -100,6 +101,7 @@ export const ProjectEditor = () => {
             }
             if (data?.id) {
                 await syncTreeNode({ id: data.id, ...payload });
+                await invalidatePublicCache('projects', data.id);
             }
             toast.success('Project added');
         }
@@ -121,6 +123,7 @@ export const ProjectEditor = () => {
             fetchData();
             return;
         }
+        await invalidatePublicCache('projects', id);
         toast.success('Project deleted');
     };
 
@@ -169,14 +172,15 @@ export const ProjectEditor = () => {
     };
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-3xl p-6 h-full flex flex-col">
-            <h2 className="text-xl font-medium mb-6 flex items-center gap-2">
+        <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-white/5 bg-neutral-900/50 p-6 lg:flex-row lg:gap-6">
+            <div className="mb-6 shrink-0 lg:mb-0 lg:w-[min(42%,420px)]">
+            <h2 className="mb-6 flex items-center gap-2 text-xl font-medium">
                 <Edit2 size={20} className="text-purple-400" />
-                Projects
+                {editingId ? "Edit project" : "Projects"}
             </h2>
 
             {/* Form */}
-            <div className="bg-white/5 rounded-2xl p-4 mb-6 space-y-4 border border-white/5">
+            <div className="space-y-4 rounded-2xl border border-white/5 bg-white/5 p-4">
                 <div className="grid grid-cols-1 gap-4">
                     <input
                         className="bg-neutral-800 rounded-lg px-3 py-2 outline-none text-sm border border-transparent focus:border-purple-500 transition-colors"
@@ -240,24 +244,32 @@ export const ProjectEditor = () => {
                     </button>
                 </div>
             </div>
+            </div>
 
-            {/* List */}
-            <ScrollArea className="min-h-0 flex-1 pr-2">
+            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
                 <div className="space-y-2">
                     {projects.map(p => (
-                        <div key={p.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="font-medium truncate">{p.title}</h3>
-                                </div>
-                                <p className="text-xs text-neutral-500 truncate">{p.description}</p>
+                        <div key={p.id} className="flex min-w-0 flex-col gap-3 rounded-xl border border-white/5 bg-white/5 p-3 sm:flex-row sm:items-center">
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                                <h3 className="truncate font-medium">{p.title}</h3>
+                                <p className="truncate text-xs text-neutral-500">{p.description}</p>
                             </div>
-                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                                <button onClick={() => handleEdit(p)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400">
-                                    <Edit2 size={16} />
+                            <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => handleEdit(p)}
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-blue-300 hover:bg-white/10"
+                                >
+                                    <Edit2 size={14} />
+                                    Edit
                                 </button>
-                                <button onClick={() => handleDelete(p.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400">
-                                    <Trash2 size={16} />
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(p.id)}
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-red-300 hover:bg-white/10"
+                                >
+                                    <Trash2 size={14} />
+                                    Delete
                                 </button>
                             </div>
                         </div>
@@ -266,7 +278,7 @@ export const ProjectEditor = () => {
                         <p className="py-8 text-center text-sm text-neutral-500">No data found</p>
                     ) : null}
                 </div>
-            </ScrollArea>
+            </div>
         </div>
     );
 };

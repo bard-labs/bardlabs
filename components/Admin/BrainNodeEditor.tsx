@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { Trash2, Brain, Save, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { invalidatePublicCache } from '@/lib/public-cache';
 
 type BrainNode = {
     id: string;
@@ -72,6 +73,7 @@ export const BrainNodeEditor = () => {
                 toast.error('Update failed', { description: error.message });
                 return;
             }
+            await invalidatePublicCache('brain');
             toast.success('Brain node updated');
         } else {
             const { error } = await supabase.from('brain_nodes').insert([payload]);
@@ -79,6 +81,7 @@ export const BrainNodeEditor = () => {
                 toast.error('Could not add node', { description: error.message });
                 return;
             }
+            await invalidatePublicCache('brain');
             toast.success('Brain node added');
         }
 
@@ -93,6 +96,7 @@ export const BrainNodeEditor = () => {
             toast.error('Delete failed', { description: error.message });
             return;
         }
+        await invalidatePublicCache('brain');
         toast.success('Brain node deleted');
         fetchData();
     };

@@ -153,7 +153,10 @@ export function WheelCarousel({
   const previousDragRotationRef = useRef(startingIndex);
   const frameRef = useRef<number | null>(null);
 
-  useEffect(() => setThemeReady(true), []);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setThemeReady(true), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const normalizedIndex = wrapIndex(selectedRef.current, itemCount);
@@ -214,7 +217,9 @@ export function WheelCarousel({
   );
 
   const commitRotationRef = useRef(commitRotation);
-  commitRotationRef.current = commitRotation;
+  useEffect(() => {
+    commitRotationRef.current = commitRotation;
+  }, [commitRotation]);
 
   const runAnimation = useCallback(() => {
     if (frameRef.current !== null) return;
@@ -282,8 +287,9 @@ export function WheelCarousel({
     if (delta > itemCount / 2) delta -= itemCount;
     if (delta < -itemCount / 2) delta += itemCount;
     selectedRef.current = controlledIndex;
-    setSelectedIndex(controlledIndex);
+    const timer = window.setTimeout(() => setSelectedIndex(controlledIndex), 0);
     commitRotationRef.current(rotationRef.current + delta);
+    return () => window.clearTimeout(timer);
   }, [activeIndex, itemCount]);
 
   const moveBy = (amount: number) => {

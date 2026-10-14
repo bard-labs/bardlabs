@@ -496,16 +496,18 @@ export default function ContributionSkyline({
   const df = React.useMemo(() => new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" }), [locale])
   const dfy = React.useMemo(() => new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }), [locale])
   const dfl = React.useMemo(() => new Intl.DateTimeFormat(locale, { weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: "UTC" }), [locale])
-  const noun = (n: number) => (n === 1 ? unit : plural)
-  const describe = (i: number) => {
+  const noun = React.useCallback((n: number) => (n === 1 ? unit : plural), [plural, unit])
+  const describe = React.useCallback((i: number) => {
     const c = model.cells[i]
     if (!c) return ""
     return (c.count ? nf.format(c.count) + " " + noun(c.count) : "No " + plural) + " on " + dfl.format(dayMs(c.date))
-  }
+  }, [dfl, model.cells, nf, noun, plural])
 
   // Everything the render loop reads, refreshed every render so the loop never closes over stale props.
   const cfg = React.useRef({ model, duration, heightScale, orbit, palette, legendLevel, onCellClick, target: view === "3d" ? 1 : 0, setActive, setWidth, setTheme, setAnnounce, describe })
-  cfg.current = { model, duration, heightScale, orbit, palette, legendLevel, onCellClick, target: view === "3d" ? 1 : 0, setActive, setWidth, setTheme, setAnnounce, describe }
+  React.useEffect(() => {
+    cfg.current = { model, duration, heightScale, orbit, palette, legendLevel, onCellClick, target: view === "3d" ? 1 : 0, setActive, setWidth, setTheme, setAnnounce, describe }
+  }, [model, duration, heightScale, orbit, palette, legendLevel, onCellClick, view, setActive, setWidth, setTheme, setAnnounce, describe])
 
   React.useEffect(() => {
     const root = rootRef.current
@@ -1132,7 +1134,6 @@ export default function ContributionSkyline({
       engine.current = null
     }
     // The loop reads everything else through cfg; it is built once per mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale])
 
   React.useEffect(() => {

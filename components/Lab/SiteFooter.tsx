@@ -90,7 +90,7 @@ export function SiteFooter() {
 
         <div className="flex flex-col gap-2 border-t border-neutral-200 pt-3 text-[10px] tracking-[0.18em] text-neutral-500 uppercase sm:flex-row sm:items-center sm:justify-between sm:text-[11px]">
           <p>© {new Date().getFullYear()} Bardlabs</p>
-          <p>Laboratory · Not a résumé</p>
+          <p>Not a résumé</p>
         </div>
       </div>
     </footer>

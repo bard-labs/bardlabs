@@ -1,77 +1,14 @@
 import Link from "next/link"
-import { ArrowLeft, ChevronRight, FileText, Folder, Link2, Network } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { FeatureOff } from "@/components/FeatureOff"
+import { LabGraph } from "@/components/Lab/LabGraph"
 import { isFeatureEnabled } from "@/lib/features-data"
-import { fetchLabTree, fetchSiteLinks, type LabNode } from "@/lib/lab-data"
-
-type TreeNode = LabNode & { children: TreeNode[] }
-
-function buildTree(nodes: LabNode[]): TreeNode[] {
-  const map = new Map<string, TreeNode>()
-  nodes.forEach((n) => map.set(n.id, { ...n, children: [] }))
-  const roots: TreeNode[] = []
-  map.forEach((node) => {
-    if (node.parent_id && map.has(node.parent_id)) {
-      map.get(node.parent_id)!.children.push(node)
-    } else {
-      roots.push(node)
-    }
-  })
-  const sortRec = (list: TreeNode[]) => {
-    list.sort((a, b) => a.sort_order - b.sort_order)
-    list.forEach((c) => sortRec(c.children))
-  }
-  sortRec(roots)
-  return roots
-}
-
-const icons = {
-  folder: Folder,
-  discipline: Network,
-  project: FileText,
-  link: Link2,
-  note: FileText,
-} as const
-
-function NodeRow({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
-  const Icon = icons[node.kind]
-  const inner = (
-    <div
-      className="flex items-start gap-3 border-b border-white/10 py-3 transition-colors hover:bg-white/[0.03]"
-      style={{ paddingLeft: 12 + depth * 18 }}
-    >
-      <Icon size={16} className="mt-1 shrink-0 text-neutral-500" />
-      <div className="min-w-0 flex-1">
-        <p className="font-medium tracking-tight">{node.title}</p>
-        {node.summary ? <p className="mt-1 text-sm text-neutral-500">{node.summary}</p> : null}
-      </div>
-      {node.href ? <ChevronRight size={16} className="mt-1 text-neutral-600" /> : null}
-    </div>
-  )
-
-  return (
-    <div>
-      {node.href ? (
-        <Link
-          href={node.href}
-          target={node.href.startsWith("http") ? "_blank" : undefined}
-          rel={node.href.startsWith("http") ? "noreferrer" : undefined}
-        >
-          {inner}
-        </Link>
-      ) : (
-        inner
-      )}
-      {node.children.map((child) => (
-        <NodeRow key={child.id} node={child} depth={depth + 1} />
-      ))}
-    </div>
-  )
-}
+import { fetchSiteLinks } from "@/lib/lab-data"
+import { getPublicLabGraph } from "@/lib/public-data"
 
 export const metadata = {
-  title: "Connection map · Bardlabs",
-  description: "How disciplines, projects, and networks connect across the lab.",
+  title: "Connection graph · Bardlabs",
+  description: "How disciplines and projects connect across the lab.",
 }
 
 export default async function MapPage() {
@@ -79,12 +16,11 @@ export default async function MapPage() {
     return <FeatureOff title="Offline" featureLabel="Connections" />
   }
 
-  const [nodes, links] = await Promise.all([fetchLabTree(), fetchSiteLinks()])
-  const tree = buildTree(nodes)
+  const [graph, links] = await Promise.all([getPublicLabGraph(), fetchSiteLinks()])
 
   return (
     <main className="min-h-[100svh] bg-[#050505] px-4 pb-28 pt-28 text-white sm:px-8">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-6xl">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-neutral-500 hover:text-white"
@@ -94,13 +30,12 @@ export default async function MapPage() {
         </Link>
 
         <header className="mt-10 border-b border-white/10 pb-8">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Advantage</p>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Graph</p>
           <h1 className="mt-2 text-4xl font-medium tracking-tight sm:text-5xl">
             Connecting dots
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-400 sm:text-base">
-            One lab graph — disciplines, builds, and networks mapped so systems, software, and
-            mechanics stay in the same conversation.
+            Hover a project to preview it. Click a node to open the lab field or the archive entry.
           </p>
         </header>
 
@@ -120,11 +55,15 @@ export default async function MapPage() {
             ))}
         </div>
 
-        <section className="mt-12 overflow-hidden border border-white/15">
-          {tree.length === 0 ? (
-            <p className="p-6 text-sm text-neutral-500">No data found</p>
+        <section className="mt-10">
+          {graph.projects.length === 0 && graph.disciplines.length === 0 ? (
+            <p className="border border-white/10 p-6 text-sm text-neutral-500">No data found</p>
           ) : (
-            tree.map((node) => <NodeRow key={node.id} node={node} />)
+            <LabGraph
+              disciplines={graph.disciplines}
+              projects={graph.projects}
+              links={graph.links}
+            />
           )}
         </section>
       </div>

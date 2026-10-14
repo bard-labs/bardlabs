@@ -22,10 +22,7 @@ export function SiteNav() {
 
   useEffect(() => {
     const hero = document.getElementById("lab-hero")
-    if (!hero) {
-      setHeroInView(false)
-      return
-    }
+    if (!hero) return
 
     const observer = new IntersectionObserver(
       ([entry]) =>
@@ -37,7 +34,10 @@ export function SiteNav() {
   }, [pathname])
 
   useEffect(() => {
-    if (!open) setPanel(0)
+    if (!open) {
+      const timer = window.setTimeout(() => setPanel(0), 0)
+      return () => window.clearTimeout(timer)
+    }
   }, [open])
 
   const clearClose = () => {
@@ -182,9 +182,6 @@ export function SiteNav() {
                                 <div className="nav-cell-label relative z-10 px-2 text-center">
                   <p className="text-[clamp(1.6rem,9vw,7rem)] font-semibold leading-none tracking-[-0.06em] text-white">
                     BARDLABS
-                  </p>
-                  <p className="mt-2 text-[9px] uppercase tracking-[0.28em] text-neutral-400 sm:mt-3 sm:text-xs sm:tracking-[0.35em]">
-                    Laboratory
                   </p>
                 </div>
               </Link>

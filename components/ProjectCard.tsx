@@ -3,6 +3,7 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ArrowUpRight } from 'lucide-react';
+import { plainText } from '@/lib/prose-text';
 
 export interface Project {
     id: string;
@@ -70,7 +71,7 @@ export const ProjectCard = ({ project, index }: ProjectCardProps) => {
 
                     <div className="z-10">
                         <h3 className="text-xl font-bold text-white mb-1 break-words">{project.title}</h3>
-                        <p className="text-sm text-neutral-400 line-clamp-2 break-words whitespace-normal">{project.description}</p>
+                        <p className="text-sm text-neutral-400 line-clamp-2 break-words whitespace-normal">{plainText(project.description)}</p>
                     </div>
                 </div>
             </div>

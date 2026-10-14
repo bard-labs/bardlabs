@@ -1,39 +1,22 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { createClient } from "@/utils/supabase/client"
+import { useState } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
+import type { PublicLog } from "@/lib/public-data"
 
-type Log = {
-  id: string
-  content: string
-  created_at: string
-}
+type Log = PublicLog
 
-export function LogsClient() {
-  const supabase = createClient()
-  const [logs, setLogs] = useState<Log[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data } = await supabase.from("logs").select("*").order("created_at", { ascending: false })
-      if (data) setLogs(data as Log[])
-      setLoading(false)
-    }
-    void fetchData()
-  }, [supabase])
+export function LogsClient({ initialLogs }: { initialLogs: Log[] }) {
+  const [logs] = useState<Log[]>(initialLogs)
 
   useGSAP(() => {
-    if (!loading) {
-      gsap.fromTo(
-        ".log-item",
-        { x: -20, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: "power2.out" },
-      )
-    }
-  }, [loading])
+    gsap.fromTo(
+      ".log-item",
+      { x: -20, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: "power2.out" },
+    )
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#050505] p-8 pb-32 font-sans text-white">
@@ -50,20 +33,14 @@ export function LogsClient() {
         {logs.map((log) => (
           <div key={log.id} className="log-item group relative pl-12">
             <div className="absolute top-2 left-[13px] h-1.5 w-1.5 rounded-full bg-neutral-600 ring-4 ring-[#050505] transition-colors group-hover:bg-white" />
-
             <div className="mb-1 flex items-baseline gap-3">
-              <span className="font-mono text-xs text-neutral-500">
-                {new Date(log.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-              </span>
+              <span className="font-mono text-xs text-neutral-500">{new Date(log.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
             </div>
-
             <p className="text-sm leading-relaxed text-neutral-300">{log.content}</p>
           </div>
         ))}
 
-        {logs.length === 0 && !loading ? (
-          <div className="pl-12 text-neutral-500">No data found</div>
-        ) : null}
+        {logs.length === 0 ? <div className="pl-12 text-neutral-500">No data found</div> : null}
       </div>
     </div>
   )

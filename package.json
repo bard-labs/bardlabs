@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm lint && pnpm typecheck",
+    "verify": "pnpm check && pnpm build",
+    "smoke:local": "node scripts/smoke-local.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

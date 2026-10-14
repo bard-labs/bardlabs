@@ -32,11 +32,13 @@ export function ProjectDisciplineLinker() {
   }, [supabase])
 
   useEffect(() => {
-    void loadProjects()
+    const timer = window.setTimeout(() => void loadProjects(), 0)
+    return () => window.clearTimeout(timer)
   }, [loadProjects])
 
   useEffect(() => {
-    void loadLinks(selectedProject)
+    const timer = window.setTimeout(() => void loadLinks(selectedProject), 0)
+    return () => window.clearTimeout(timer)
   }, [selectedProject, loadLinks])
 
   const toggle = (id: string) => {
