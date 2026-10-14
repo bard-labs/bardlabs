@@ -52,6 +52,10 @@ export function ProseText({
   )
 }
 
+export function hasRtl(text: string) {
+  return /[\u0600-\u06FF]/.test(text)
+}
+
 export function plainText(text: string) {
   return text
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, "$1")

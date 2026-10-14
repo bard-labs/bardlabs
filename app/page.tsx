@@ -123,7 +123,7 @@ export default function Home() {
             <ArrowUpRight className="text-neutral-500 transition-colors group-hover:text-violet-300" />
             <div>
               <h3 className="text-2xl font-medium tracking-tight">Connections</h3>
-              <p className="mt-2 text-sm text-neutral-500">Graph of the lab</p>
+              <p className="mt-2 text-sm text-neutral-500">Dot map · Filetree</p>
             </div>
           </Link>
           <Link

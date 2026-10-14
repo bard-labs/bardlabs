@@ -8,7 +8,7 @@ import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import type { PublicDisciplineLink, PublicProject } from "@/lib/public-data"
 import { ProjectGallery } from "@/components/Project/ProjectGallery"
-import { ProseText } from "@/lib/prose-text"
+import { ProseText, hasRtl } from "@/lib/prose-text"
 
 type Project = PublicProject
 type DisciplineLink = PublicDisciplineLink
@@ -52,7 +52,7 @@ export function ProjectDetailClient({
             <ChevronLeft size={14} /> Archive
           </button>
 
-          <header ref={headerRef}>
+          <header ref={headerRef} dir={hasRtl(project.title) || hasRtl(project.description ?? "") ? "rtl" : undefined}>
             <h1 className="text-4xl font-medium tracking-tight sm:text-5xl">{project.title}</h1>
             {project.description ? (
               <ProseText

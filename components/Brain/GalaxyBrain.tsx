@@ -213,7 +213,18 @@ const NodePlanet = ({ position, color, label, onClick }: NodePlanetProps) => {
 
 
 const Connection = ({ start, end, color }: ConnectionObject) => {
-    const points = useMemo(() => [start, end], [start, end]);
+    const points = useMemo(() => {
+        const mid = start.clone().lerp(end, 0.5)
+        const chord = end.clone().sub(start)
+        const len = chord.length() || 1
+        let side = new THREE.Vector3().crossVectors(chord, new THREE.Vector3(0, 1, 0))
+        if (side.lengthSq() < 1e-6) {
+            side = new THREE.Vector3().crossVectors(chord, new THREE.Vector3(1, 0, 0))
+        }
+        side.normalize().multiplyScalar(len * 0.16)
+        mid.add(side)
+        return new THREE.QuadraticBezierCurve3(start, mid, end).getPoints(18)
+    }, [start, end])
 
     return (
         <Line

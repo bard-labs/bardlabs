@@ -74,7 +74,7 @@ export const getPublicLabGraph = unstable_cache(
       links: links ?? [],
     }
   },
-  ["public-lab-graph", "seed-2"],
+  ["public-lab-graph", "seed-3"],
   { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-projects", "public-lab-graph"] },
 )
 
@@ -88,7 +88,7 @@ export const getPublicProjects = unstable_cache(
     if (error) throw error
     return (data ?? []).map(normalizeProject)
   },
-  ["public-projects", "seed-2"],
+  ["public-projects", "seed-3"],
   { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-projects"] },
 )
 
@@ -129,7 +129,7 @@ export async function getPublicProjectDetail(id: string): Promise<{
 
       return { project: project ? normalizeProject(project) : null, disciplines }
     },
-    ["public-project-detail", id, "seed-2"],
+    ["public-project-detail", id, "seed-3"],
     { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-projects", `public-project:${id}`] },
   )()
 }
@@ -180,6 +180,6 @@ export const getPublicBrain = unstable_cache(
 
     return { categories: categories ?? [], nodes: normalizedNodes }
   },
-  ["public-brain", "seed-2"],
+  ["public-brain", "seed-3"],
   { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-brain"] },
 )
