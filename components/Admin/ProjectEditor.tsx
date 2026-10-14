@@ -4,6 +4,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Trash2, Image as ImageIcon, Save, Edit2 } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
+import { handleAuthFailure } from '@/lib/auth-session';
+import { invalidatePublicCache } from '@/lib/public-cache';
 
 type Project = {
     id: string;
@@ -40,8 +43,36 @@ export const ProjectEditor = () => {
         run();
     }, [fetchData]);
 
+    const syncTreeNode = async (project: { id: string; title: string; description?: string | null; link?: string | null }) => {
+        const archiveFolder = '11111111-1111-1111-1111-111111111104'
+        const { data: existing } = await supabase
+            .from('lab_nodes')
+            .select('id')
+            .eq('kind', 'project')
+            .eq('ref_id', project.id)
+            .maybeSingle()
+
+        const nodePayload = {
+            parent_id: archiveFolder,
+            kind: 'project' as const,
+            title: project.title,
+            summary: project.description || null,
+            href: `/projects/${project.id}`,
+            ref_id: project.id,
+        }
+
+        if (existing?.id) {
+            await supabase.from('lab_nodes').update(nodePayload).eq('id', existing.id)
+        } else {
+            await supabase.from('lab_nodes').insert({ ...nodePayload, sort_order: Date.now() % 100000 })
+        }
+    }
+
     const handleSave = async () => {
-        if (!formData.title) return;
+        if (!formData.title) {
+            toast.error('Title is required');
+            return;
+        }
 
         const payload = {
             title: formData.title,
@@ -52,9 +83,27 @@ export const ProjectEditor = () => {
         };
 
         if (editingId) {
-            await supabase.from('projects').update(payload).eq('id', editingId);
+            const { error } = await supabase.from('projects').update(payload).eq('id', editingId);
+            if (error) {
+                if (handleAuthFailure(error, 'Update failed')) return;
+                toast.error('Update failed', { description: error.message });
+                return;
+            }
+            await syncTreeNode({ id: editingId, ...payload });
+            await invalidatePublicCache('projects', editingId);
+            toast.success('Project updated');
         } else {
-            await supabase.from('projects').insert([payload]);
+            const { data, error } = await supabase.from('projects').insert([payload]).select('id').single();
+            if (error) {
+                if (handleAuthFailure(error, 'Could not add project')) return;
+                toast.error('Could not add project', { description: error.message });
+                return;
+            }
+            if (data?.id) {
+                await syncTreeNode({ id: data.id, ...payload });
+                await invalidatePublicCache('projects', data.id);
+            }
+            toast.success('Project added');
         }
 
         resetForm();
@@ -62,19 +111,20 @@ export const ProjectEditor = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Are you sure?')) {
-            // Optimistic update
-            setProjects(prev => prev.filter(p => p.id !== id));
+        if (!confirm('Are you sure?')) return;
 
-            const { error } = await supabase.from('projects').delete().eq('id', id);
+        setProjects(prev => prev.filter(p => p.id !== id));
 
-            if (error) {
-                console.error('Error deleting project:', error);
-                alert('Failed to delete project. It might be referenced by other items.');
-                // Revert optimistic update
-                fetchData();
-            }
+        await supabase.from('lab_nodes').delete().eq('kind', 'project').eq('ref_id', id)
+        const { error } = await supabase.from('projects').delete().eq('id', id);
+
+        if (error) {
+            toast.error('Delete failed', { description: error.message });
+            fetchData();
+            return;
         }
+        await invalidatePublicCache('projects', id);
+        toast.success('Project deleted');
     };
 
     const handleEdit = (project: Project) => {
@@ -110,9 +160,10 @@ export const ProjectEditor = () => {
         const { error: uploadError } = await supabase.storage.from('portfolio').upload(filePath, file);
 
         if (uploadError) {
-            alert('Error uploading image: ' + uploadError.message);
+            toast.error('Image upload failed', { description: uploadError.message });
             return;
         }
+        toast.success('Image uploaded');
 
         const { data } = supabase.storage.from('portfolio').getPublicUrl(filePath);
         if (data) {
@@ -121,14 +172,15 @@ export const ProjectEditor = () => {
     };
 
     return (
-        <div className="bg-neutral-900/50 border border-white/5 rounded-3xl p-6 h-full flex flex-col">
-            <h2 className="text-xl font-medium mb-6 flex items-center gap-2">
+        <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-white/5 bg-neutral-900/50 p-6 lg:flex-row lg:gap-6">
+            <div className="mb-6 shrink-0 lg:mb-0 lg:w-[min(42%,420px)]">
+            <h2 className="mb-6 flex items-center gap-2 text-xl font-medium">
                 <Edit2 size={20} className="text-purple-400" />
-                Projects
+                {editingId ? "Edit project" : "Projects"}
             </h2>
 
             {/* Form */}
-            <div className="bg-white/5 rounded-2xl p-4 mb-6 space-y-4 border border-white/5">
+            <div className="space-y-4 rounded-2xl border border-white/5 bg-white/5 p-4">
                 <div className="grid grid-cols-1 gap-4">
                     <input
                         className="bg-neutral-800 rounded-lg px-3 py-2 outline-none text-sm border border-transparent focus:border-purple-500 transition-colors"
@@ -192,27 +244,40 @@ export const ProjectEditor = () => {
                     </button>
                 </div>
             </div>
+            </div>
 
-            {/* List */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
-                {projects.map(p => (
-                    <div key={p.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-medium truncate">{p.title}</h3>
+            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
+                <div className="space-y-2">
+                    {projects.map(p => (
+                        <div key={p.id} className="flex min-w-0 flex-col gap-3 rounded-xl border border-white/5 bg-white/5 p-3 sm:flex-row sm:items-center">
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                                <h3 className="truncate font-medium">{p.title}</h3>
+                                <p className="truncate text-xs text-neutral-500">{p.description}</p>
                             </div>
-                            <p className="text-xs text-neutral-500 truncate">{p.description}</p>
+                            <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => handleEdit(p)}
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-blue-300 hover:bg-white/10"
+                                >
+                                    <Edit2 size={14} />
+                                    Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(p.id)}
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-red-300 hover:bg-white/10"
+                                >
+                                    <Trash2 size={14} />
+                                    Delete
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                            <button onClick={() => handleEdit(p)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400">
-                                <Edit2 size={16} />
-                            </button>
-                            <button onClick={() => handleDelete(p.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400">
-                                <Trash2 size={16} />
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    ))}
+                    {projects.length === 0 ? (
+                        <p className="py-8 text-center text-sm text-neutral-500">No data found</p>
+                    ) : null}
+                </div>
             </div>
         </div>
     );

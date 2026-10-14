@@ -13,6 +13,24 @@
 # testing
 /coverage
 
+# tools
+.claude/
+.agents/
+.cursor/
+skills-lock.json
+.vscode/
+supabase/.temp/
+
+# logs
+*.log
+*.log.*
+*.log.*.*
+*.log.*.*.*
+*.log.*.*.*.*
+*.log.*.*.*.*.*
+*.log.*.*.*.*.*.*
+
+
 # next.js
 /.next/
 /out/
@@ -34,6 +52,8 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+.admin-credentials.local
+*.admin-pass*
 
 # vercel
 .vercel
@@ -41,3 +61,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+scripts/seed*
+scripts/seed-assets/

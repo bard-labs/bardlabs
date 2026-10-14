@@ -126,6 +126,161 @@ export type Database = {
                 }
                 Relationships: []
             }
+            lab_disciplines: {
+                Row: {
+                    id: string
+                    title: string
+                    subtitle: string
+                    summary: string
+                    sort_order: number
+                    created_at: string
+                }
+                Insert: {
+                    id: string
+                    title: string
+                    subtitle: string
+                    summary: string
+                    sort_order?: number
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    title?: string
+                    subtitle?: string
+                    summary?: string
+                    sort_order?: number
+                    created_at?: string
+                }
+                Relationships: []
+            }
+            site_links: {
+                Row: {
+                    id: string
+                    label: string
+                    url: string
+                    kind: string
+                    sort_order: number
+                    created_at: string
+                }
+                Insert: {
+                    id: string
+                    label: string
+                    url: string
+                    kind?: string
+                    sort_order?: number
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    label?: string
+                    url?: string
+                    kind?: string
+                    sort_order?: number
+                    created_at?: string
+                }
+                Relationships: []
+            }
+            site_features: {
+                Row: {
+                    id: string
+                    label: string
+                    path: string
+                    enabled: boolean
+                    sort_order: number
+                    updated_at: string
+                }
+                Insert: {
+                    id: string
+                    label: string
+                    path: string
+                    enabled?: boolean
+                    sort_order?: number
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    label?: string
+                    path?: string
+                    enabled?: boolean
+                    sort_order?: number
+                    updated_at?: string
+                }
+                Relationships: []
+            }
+            project_disciplines: {
+                Row: {
+                    project_id: string
+                    discipline_id: string
+                }
+                Insert: {
+                    project_id: string
+                    discipline_id: string
+                }
+                Update: {
+                    project_id?: string
+                    discipline_id?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "project_disciplines_project_id_fkey"
+                        columns: ["project_id"]
+                        isOneToOne: false
+                        referencedRelation: "projects"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "project_disciplines_discipline_id_fkey"
+                        columns: ["discipline_id"]
+                        isOneToOne: false
+                        referencedRelation: "lab_disciplines"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            lab_nodes: {
+                Row: {
+                    id: string
+                    parent_id: string | null
+                    kind: string
+                    title: string
+                    summary: string | null
+                    href: string | null
+                    ref_id: string | null
+                    sort_order: number
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    parent_id?: string | null
+                    kind: string
+                    title: string
+                    summary?: string | null
+                    href?: string | null
+                    ref_id?: string | null
+                    sort_order?: number
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    parent_id?: string | null
+                    kind?: string
+                    title?: string
+                    summary?: string | null
+                    href?: string | null
+                    ref_id?: string | null
+                    sort_order?: number
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "lab_nodes_parent_id_fkey"
+                        columns: ["parent_id"]
+                        isOneToOne: false
+                        referencedRelation: "lab_nodes"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
         }
         Views: {
             [_ in never]: never

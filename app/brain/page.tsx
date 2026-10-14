@@ -1,13 +1,13 @@
-"use client"
+import { FeatureOff } from "@/components/FeatureOff"
+import { isFeatureEnabled } from "@/lib/features-data"
+import { getPublicBrain } from "@/lib/public-data"
+import { BrainClient } from "./brain-client"
 
-import { GalaxyBrain } from '@/components/Brain/GalaxyBrain';
+export default async function BrainPage() {
+  if (!(await isFeatureEnabled("brain"))) {
+    return <FeatureOff title="Offline" featureLabel="Brain" />
+  }
 
-
-export default function BrainPage() {
-    return (
-        <main className="w-full h-screen bg-black overflow-hidden relative">
-            <GalaxyBrain />
-
-        </main>
-    );
+  const brain = await getPublicBrain()
+  return <BrainClient {...brain} />
 }

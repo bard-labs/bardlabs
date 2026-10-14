@@ -1,11 +1,19 @@
 "use client"
 
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Stars, Float, Line } from '@react-three/drei';
 import * as THREE from 'three';
-import { createClient } from '@/utils/supabase/client';
 import { X } from 'lucide-react';
+import type { PublicBrainNode, PublicCategory } from '@/lib/public-data';
+
+export type GalaxyBrainProps = {
+    categories: PublicCategory[];
+    nodes: PublicBrainNode[];
+};
+
+export type SupabaseBrainNode = PublicBrainNode;
+export type Category = PublicCategory;
 
 
 type BrainNode = {
@@ -17,20 +25,6 @@ type BrainNode = {
     position: THREE.Vector3;
 };
 
-type SupabaseBrainNode = {
-    id: string;
-    label: string;
-    description: string;
-    category_id: string;
-    parent_id: string | null;
-    position: { x: number; y: number; z: number };
-};
-
-type Category = {
-    id: string;
-    name: string;
-    color: string;
-};
 
 type SceneObject = {
     id: string;
@@ -219,7 +213,18 @@ const NodePlanet = ({ position, color, label, onClick }: NodePlanetProps) => {
 
 
 const Connection = ({ start, end, color }: ConnectionObject) => {
-    const points = useMemo(() => [start, end], [start, end]);
+    const points = useMemo(() => {
+        const mid = start.clone().lerp(end, 0.5)
+        const chord = end.clone().sub(start)
+        const len = chord.length() || 1
+        let side = new THREE.Vector3().crossVectors(chord, new THREE.Vector3(0, 1, 0))
+        if (side.lengthSq() < 1e-6) {
+            side = new THREE.Vector3().crossVectors(chord, new THREE.Vector3(1, 0, 0))
+        }
+        side.normalize().multiplyScalar(len * 0.16)
+        mid.add(side)
+        return new THREE.QuadraticBezierCurve3(start, mid, end).getPoints(18)
+    }, [start, end])
 
     return (
         <Line
@@ -313,28 +318,23 @@ const MilkyWay = () => {
     );
 };
 
-const GalaxyScene = ({ onNodeSelect }: { onNodeSelect: (node: SceneObject | null) => void }) => {
-    const supabase = useMemo(() => createClient(), []);
-    const [nodes, setNodes] = useState<BrainNode[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
+const GalaxyScene = ({
+    categories: initialCategories,
+    nodes: initialNodes,
+    onNodeSelect,
+}: GalaxyBrainProps & { onNodeSelect: (node: SceneObject | null) => void }) => {
+    const [nodes] = useState<BrainNode[]>(() => initialNodes.map((node) => ({
+        ...node,
+        description: node.description ?? "",
+        category_id: node.category_id ?? "",
+        position: new THREE.Vector3(node.position.x, node.position.y, node.position.z),
+    })));
+    const [categories] = useState<Category[]>(initialCategories);
     const [focusedItem, setFocusedItem] = useState<SceneObject | null>(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data: cats } = await supabase.from('categories').select('*').eq('type', 'brain');
-            const { data: nds } = await supabase.from('brain_nodes').select('*');
+    void focusedItem;
+    void setFocusedItem;
 
-            if (cats) setCategories(cats as Category[]);
-            if (nds) {
-                const parsedNodes = (nds as unknown as SupabaseBrainNode[]).map(n => ({
-                    ...n,
-                    position: new THREE.Vector3(n.position.x, n.position.y, n.position.z)
-                }));
-                setNodes(parsedNodes);
-            }
-        };
-        fetchData();
-    }, [supabase]);
 
     const handleFocus = (item: SceneObject) => {
         setFocusedItem(item);
@@ -480,13 +480,13 @@ const GalaxyScene = ({ onNodeSelect }: { onNodeSelect: (node: SceneObject | null
     );
 };
 
-export const GalaxyBrain = () => {
+export const GalaxyBrain = ({ categories, nodes }: GalaxyBrainProps) => {
     const [selectedNode, setSelectedNode] = useState<SceneObject | null>(null);
 
     return (
         <div className="w-full h-screen bg-black relative">
             <Canvas camera={{ position: [0, 15, 25], fov: 50 }}>
-                <GalaxyScene onNodeSelect={setSelectedNode} />
+                <GalaxyScene categories={categories} nodes={nodes} onNodeSelect={setSelectedNode} />
             </Canvas>
 
             {/* Overlay UI */}
