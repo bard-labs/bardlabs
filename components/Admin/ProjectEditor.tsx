@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 import { handleAuthFailure } from '@/lib/auth-session';
 import { invalidatePublicCache } from '@/lib/public-cache';
+import { normalizeProjectStatus, PROJECT_STATUSES, projectStatusLabel, type ProjectStatus } from '@/lib/project-status';
 
 type Project = {
     id: string;
@@ -15,6 +16,7 @@ type Project = {
     link: string;
     tags: string[];
     images: string[];
+    status: ProjectStatus;
     created_at: string;
 };
 
@@ -28,12 +30,22 @@ export const ProjectEditor = () => {
         description: '',
         link: '',
         tags: '',
+        status: 'active' as ProjectStatus,
         images: [] as string[]
     });
 
     const fetchData = useCallback(async () => {
         const { data: projs } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
-        if (projs) setProjects(projs as Project[]);
+        if (projs) {
+            setProjects(projs.map((project) => ({
+                ...project,
+                description: project.description ?? '',
+                link: project.link ?? '',
+                tags: project.tags ?? [],
+                images: Array.isArray(project.images) ? project.images.filter((value): value is string => typeof value === 'string') : [],
+                status: normalizeProjectStatus(project.status),
+            })));
+        }
     }, [supabase]);
 
     useEffect(() => {
@@ -78,6 +90,7 @@ export const ProjectEditor = () => {
             title: formData.title,
             description: formData.description,
             link: formData.link,
+            status: formData.status,
             tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
             images: formData.images
         };
@@ -134,6 +147,7 @@ export const ProjectEditor = () => {
             description: project.description || '',
             link: project.link || '',
             tags: project.tags ? project.tags.join(', ') : '',
+            status: normalizeProjectStatus(project.status),
             images: project.images || []
         });
     };
@@ -145,6 +159,7 @@ export const ProjectEditor = () => {
             description: '',
             link: '',
             tags: '',
+            status: 'active',
             images: []
         });
     };
@@ -198,12 +213,26 @@ export const ProjectEditor = () => {
                 />
 
                 <div className="grid grid-cols-2 gap-4">
+                    <label className="text-[10px] uppercase tracking-[0.16em] text-neutral-500">
+                        Status
+                        <select
+                            className="mt-1 w-full rounded-lg border border-transparent bg-neutral-800 px-3 py-2 text-sm text-white outline-none focus:border-purple-500"
+                            value={formData.status}
+                            onChange={e => setFormData({ ...formData, status: normalizeProjectStatus(e.target.value) })}
+                        >
+                            {PROJECT_STATUSES.map((status) => (
+                                <option key={status} value={status}>{projectStatusLabel(status)}</option>
+                            ))}
+                        </select>
+                    </label>
                     <input
-                        className="bg-neutral-800 rounded-lg px-3 py-2 outline-none text-sm border border-transparent focus:border-purple-500 transition-colors"
+                        className="self-end bg-neutral-800 rounded-lg px-3 py-2 outline-none text-sm border border-transparent focus:border-purple-500 transition-colors"
                         placeholder="Link (https://...)"
                         value={formData.link}
                         onChange={e => setFormData({ ...formData, link: e.target.value })}
                     />
+                </div>
+                <div className="grid grid-cols-1 gap-4">
                     <input
                         className="bg-neutral-800 rounded-lg px-3 py-2 outline-none text-sm border border-transparent focus:border-purple-500 transition-colors"
                         placeholder="Tags (comma separated)"
@@ -252,7 +281,10 @@ export const ProjectEditor = () => {
                         <div key={p.id} className="flex min-w-0 flex-col gap-3 rounded-xl border border-white/5 bg-white/5 p-3 sm:flex-row sm:items-center">
                             <div className="min-w-0 flex-1 overflow-hidden">
                                 <h3 className="truncate font-medium">{p.title}</h3>
-                                <p className="truncate text-xs text-neutral-500">{p.description}</p>
+                                <p className="truncate text-xs text-neutral-500">
+                                    {projectStatusLabel(p.status)}
+                                    {p.description ? ` · ${p.description}` : ""}
+                                </p>
                             </div>
                             <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
                                 <button

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { Link2, Save, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { invalidatePublicCache } from "@/lib/public-cache"
 
 type SiteLink = {
   id: string
@@ -46,6 +47,7 @@ export function SiteLinksEditor() {
     }
     toast.success("Link saved")
     setForm({ id: "", label: "", url: "", kind: "social" })
+    await invalidatePublicCache("overview")
     fetchData()
   }
 
@@ -57,6 +59,7 @@ export function SiteLinksEditor() {
       return
     }
     toast.success("Link deleted")
+    await invalidatePublicCache("overview")
     fetchData()
   }
 

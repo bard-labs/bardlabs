@@ -3,6 +3,7 @@ import "server-only"
 import { unstable_cache } from "next/cache"
 import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
+import { normalizeProjectStatus, type ProjectStatus } from "@/lib/project-status"
 
 export const PUBLIC_REVALIDATE_SECONDS = 60
 
@@ -13,15 +14,54 @@ const publicSupabase = createClient<Database>(
 )
 
 type ProjectRow = Database["public"]["Tables"]["projects"]["Row"]
-export type PublicProject = Omit<ProjectRow, "images" | "tags"> & {
+export type PublicProject = Omit<ProjectRow, "images" | "tags" | "status"> & {
   images: string[]
   tags: string[]
+  status: ProjectStatus
 }
 
 function normalizeProject(project: ProjectRow): PublicProject {
   const images = Array.isArray(project.images) ? project.images.filter((value): value is string => typeof value === "string") : []
   const tags = Array.isArray(project.tags) ? project.tags.filter((value): value is string => typeof value === "string") : []
-  return { ...project, images, tags }
+  return { ...project, images, tags, status: normalizeProjectStatus(project.status) }
+}
+
+export type PublicSiteLink = {
+  id: string
+  label: string
+  url: string
+  kind: string
+  sort_order: number
+}
+
+export type PublicOverview = {
+  goal: string
+  summary: string
+}
+
+const OVERVIEW_DEFAULT: PublicOverview = {
+  goal: "Keep the lab clear, and keep building.",
+  summary:
+    "Bardlabs is the workshop for systems, software, mechanics, and inquiry. Projects are what got built. The brain is the map of ideas. The personal site lives apart from this lab.",
+}
+
+const PERSONAL_SITE: PublicSiteLink = {
+  id: "website",
+  label: "bardiamardan.xyz",
+  url: "https://bardiamardan.xyz",
+  kind: "site",
+  sort_order: 5,
+}
+
+function presentLink(link: PublicSiteLink): PublicSiteLink {
+  if (link.id === "archive" || link.url === "/projects") return { ...link, label: "Projects" }
+  return link
+}
+
+function withPersonalSite(links: PublicSiteLink[]) {
+  const presented = links.map(presentLink)
+  if (presented.some((link) => link.url.includes("bardiamardan.xyz"))) return presented
+  return [PERSONAL_SITE, ...presented]
 }
 export type PublicLog = Database["public"]["Tables"]["logs"]["Row"]
 export type PublicCategory = Database["public"]["Tables"]["categories"]["Row"]
@@ -78,6 +118,38 @@ export const getPublicLabGraph = unstable_cache(
   { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-projects", "public-lab-graph"] },
 )
 
+export const getPublicOverview = unstable_cache(
+  async (): Promise<PublicOverview> => {
+    const { data, error } = await publicSupabase
+      .from("site_overview")
+      .select("goal, summary")
+      .eq("id", "main")
+      .maybeSingle()
+
+    if (error || !data) return OVERVIEW_DEFAULT
+    return {
+      goal: data.goal.trim() || OVERVIEW_DEFAULT.goal,
+      summary: data.summary.trim() || OVERVIEW_DEFAULT.summary,
+    }
+  },
+  ["public-overview", "seed-1"],
+  { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-overview"] },
+)
+
+export const getPublicSiteLinks = unstable_cache(
+  async (): Promise<PublicSiteLink[]> => {
+    const { data, error } = await publicSupabase
+      .from("site_links")
+      .select("id, label, url, kind, sort_order")
+      .order("sort_order", { ascending: true })
+
+    if (error || !data?.length) return withPersonalSite([])
+    return withPersonalSite(data)
+  },
+  ["public-site-links", "seed-1"],
+  { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-overview"] },
+)
+
 export const getPublicProjects = unstable_cache(
   async (): Promise<PublicProject[]> => {
     const { data, error } = await publicSupabase
@@ -88,7 +160,7 @@ export const getPublicProjects = unstable_cache(
     if (error) throw error
     return (data ?? []).map(normalizeProject)
   },
-  ["public-projects", "seed-3"],
+  ["public-projects", "seed-4"],
   { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-projects"] },
 )
 
@@ -129,7 +201,7 @@ export async function getPublicProjectDetail(id: string): Promise<{
 
       return { project: project ? normalizeProject(project) : null, disciplines }
     },
-    ["public-project-detail", id, "seed-3"],
+    ["public-project-detail", id, "seed-4"],
     { revalidate: PUBLIC_REVALIDATE_SECONDS, tags: ["public-projects", `public-project:${id}`] },
   )()
 }

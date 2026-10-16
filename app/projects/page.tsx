@@ -5,7 +5,7 @@ import { ProjectsClient } from "./projects-client"
 
 export default async function ProjectsPage() {
   if (!(await isFeatureEnabled("projects"))) {
-    return <FeatureOff title="Offline" featureLabel="Archive" />
+    return <FeatureOff title="Offline" featureLabel="Projects" />
   }
 
   const projects = await getPublicProjects()

@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * Full-screen lab menu. Not mounted.
+ * AppChrome uses SimpleNav instead, because this overlay was hard to navigate.
+ * To turn it back on: render <SiteNav /> from AppChrome and remove <SimpleNav />.
+ */
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"

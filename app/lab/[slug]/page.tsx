@@ -3,6 +3,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, ArrowUpRight, ExternalLink } from "lucide-react"
 import { labDisciplines } from "@/lib/lab"
+import { projectStatusLabel } from "@/lib/project-status"
 import { fetchDisciplineBundle } from "@/lib/lab-data"
 
 export function generateStaticParams() {
@@ -78,12 +79,6 @@ export default async function LabDisciplinePage({
               <ExternalLink size={12} />
             </a>
           ))}
-          <Link
-            href="/map"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.16em] text-neutral-300 transition-colors hover:border-white/40 hover:text-white"
-          >
-            Connection map
-          </Link>
         </div>
 
         <section className="mt-14">
@@ -130,7 +125,12 @@ export default async function LabDisciplinePage({
                     </div>
                     <div className="p-5">
                       <div className="flex items-start justify-between gap-3">
-                        <h3 className="text-lg font-medium tracking-tight">{project.title}</h3>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                            {projectStatusLabel(project.status)}
+                          </p>
+                          <h3 className="mt-1 text-lg font-medium tracking-tight">{project.title}</h3>
+                        </div>
                         {project.link ? (
                           <a
                             href={project.link}

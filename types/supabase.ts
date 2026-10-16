@@ -103,6 +103,7 @@ export type Database = {
                     id: string
                     images: Json | null
                     link: string | null
+                    status: string
                     tags: string[] | null
                     title: string
                 }
@@ -112,6 +113,7 @@ export type Database = {
                     id?: string
                     images?: Json | null
                     link?: string | null
+                    status?: string
                     tags?: string[] | null
                     title: string
                 }
@@ -121,6 +123,7 @@ export type Database = {
                     id?: string
                     images?: Json | null
                     link?: string | null
+                    status?: string
                     tags?: string[] | null
                     title?: string
                 }
@@ -150,6 +153,27 @@ export type Database = {
                     summary?: string
                     sort_order?: number
                     created_at?: string
+                }
+                Relationships: []
+            }
+            site_overview: {
+                Row: {
+                    id: string
+                    goal: string
+                    summary: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    goal: string
+                    summary?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    goal?: string
+                    summary?: string
+                    updated_at?: string
                 }
                 Relationships: []
             }

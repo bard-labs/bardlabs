@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { DynamicIsland } from "@/components/DynamicIsland"
-import { SiteNav } from "@/components/Nav/SiteNav"
+import { SimpleNav } from "@/components/Nav/SimpleNav"
 import SmoothScroll from "@/components/SmoothScroll"
 
 export function AppChrome({ children }: { children: React.ReactNode }) {
@@ -12,7 +12,8 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isDashboard ? <SmoothScroll /> : null}
-      {!isDashboard ? <SiteNav /> : null}
+      {/* Full-screen lab menu is off. Restore with <SiteNav /> from components/Nav/SiteNav. */}
+      {!isDashboard ? <SimpleNav /> : null}
       {children}
       {!isDashboard ? <DynamicIsland /> : null}
     </>

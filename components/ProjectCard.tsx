@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ArrowUpRight } from 'lucide-react';
 import { hasRtl, plainText } from '@/lib/prose-text';
+import { projectStatusLabel, type ProjectStatus } from '@/lib/project-status';
 
 export interface Project {
     id: string;
@@ -12,6 +13,7 @@ export interface Project {
     tags: string[];
     images: string[];
     link?: string;
+    status?: ProjectStatus;
 }
 
 interface ProjectCardProps {
@@ -50,6 +52,9 @@ export const ProjectCard = ({ project, index }: ProjectCardProps) => {
                 <div className="absolute inset-0 p-6 flex flex-col justify-between pointer-events-none">
                     <div className="flex justify-between items-start">
                         <div className="flex gap-2 flex-wrap">
+                            <span className="px-2 py-1 rounded-full bg-black/50 text-[10px] font-medium uppercase tracking-wider text-white backdrop-blur-md">
+                                {projectStatusLabel(project.status)}
+                            </span>
                             {project.tags?.map(tag => (
                                 <span key={tag} className="px-2 py-1 rounded-full bg-white/10 text-[10px] font-medium text-neutral-300 backdrop-blur-md">
                                     {tag}

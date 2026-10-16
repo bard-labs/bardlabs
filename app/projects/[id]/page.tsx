@@ -6,7 +6,7 @@ import { ProjectDetailClient } from "./project-detail-client"
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   if (!(await isFeatureEnabled("projects"))) {
-    return <FeatureOff title="Offline" featureLabel="Archive" />
+    return <FeatureOff title="Offline" featureLabel="Projects" />
   }
 
   const { id } = await params

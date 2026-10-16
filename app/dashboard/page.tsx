@@ -20,6 +20,7 @@ import { SiteLinksEditor } from "@/components/Admin/SiteLinksEditor"
 import { LabTreeEditor } from "@/components/Admin/LabTreeEditor"
 import { ProjectDisciplineLinker } from "@/components/Admin/ProjectDisciplineLinker"
 import { FeatureToggles } from "@/components/Admin/FeatureToggles"
+import { OverviewEditor } from "@/components/Admin/OverviewEditor"
 import { Menu } from "lucide-react"
 
 const TABS = [
@@ -108,6 +109,7 @@ export default function Dashboard() {
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsContent value="overview" className="mt-0 space-y-6 outline-none">
+            <OverviewEditor />
             <FeatureToggles />
             <div className="grid gap-6 lg:grid-cols-2">
               <ProjectDisciplineLinker />
@@ -118,7 +120,7 @@ export default function Dashboard() {
                     Connections
                   </Link>
                   <Link href="/projects" className="underline-offset-4 hover:underline">
-                    Archive
+                    Projects
                   </Link>
                   <Link href="/brain" className="underline-offset-4 hover:underline">
                     Brain

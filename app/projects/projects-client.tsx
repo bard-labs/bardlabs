@@ -16,6 +16,7 @@ export function ProjectsClient({ initialProjects }: { initialProjects: PublicPro
         tags: project.tags ?? [],
         images: project.images ?? [],
         link: project.link ?? undefined,
+        status: project.status,
       })),
     [initialProjects],
   )
@@ -31,7 +32,7 @@ export function ProjectsClient({ initialProjects }: { initialProjects: PublicPro
   return (
     <div className="min-h-screen bg-[#050505] p-8 pb-32 font-sans text-white">
       <header className="mx-auto mb-12 max-w-7xl pt-12">
-        <h1 className="mb-6 text-5xl font-bold tracking-tighter">Project Universe</h1>
+        <h1 className="mb-6 text-5xl font-bold tracking-tighter">Projects</h1>
       </header>
 
       {projects.length === 0 ? (

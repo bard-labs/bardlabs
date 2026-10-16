@@ -3,12 +3,13 @@
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ChevronLeft, Calendar, Tag, ExternalLink, Network } from "lucide-react"
+import { ChevronLeft, Tag, ExternalLink, Network } from "lucide-react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import type { PublicDisciplineLink, PublicProject } from "@/lib/public-data"
 import { ProjectGallery } from "@/components/Project/ProjectGallery"
 import { ProseText, hasRtl } from "@/lib/prose-text"
+import { projectStatusLabel } from "@/lib/project-status"
 
 type Project = PublicProject
 type DisciplineLink = PublicDisciplineLink
@@ -49,7 +50,7 @@ export function ProjectDetailClient({
             onClick={() => router.push("/projects")}
             className="mb-8 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-neutral-500 hover:text-white"
           >
-            <ChevronLeft size={14} /> Archive
+            <ChevronLeft size={14} /> Projects
           </button>
 
           <header ref={headerRef} dir={hasRtl(project.title) || hasRtl(project.description ?? "") ? "rtl" : undefined}>
@@ -69,8 +70,8 @@ export function ProjectDetailClient({
 
         <aside ref={metaRef} className="space-y-6 lg:col-span-4 lg:pt-16">
           <div className="border border-white/10 p-5">
-            <p className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-neutral-500"><Calendar size={12} /> Created</p>
-            <p className="text-sm text-neutral-300">{new Date(project.created_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</p>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-neutral-500">Status</p>
+            <p className="text-sm text-white">{projectStatusLabel(project.status)}</p>
           </div>
 
           {project.tags?.length ? (
@@ -92,7 +93,6 @@ export function ProjectDetailClient({
           ) : null}
 
           {project.link ? <a href={project.link} target="_blank" rel="noreferrer" className="inline-flex w-full items-center justify-center gap-2 border border-white bg-white px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-neutral-200">Open project <ExternalLink size={14} /></a> : null}
-          <Link href="/map" className="block text-center text-xs uppercase tracking-[0.18em] text-neutral-500 hover:text-white">See connection map</Link>
         </aside>
       </div>
     </div>

@@ -16,6 +16,7 @@ export type LabProject = {
   link: string | null
   tags: string[] | null
   images: string[] | null
+  status?: string | null
   created_at: string
 }
 

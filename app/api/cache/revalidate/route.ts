@@ -7,6 +7,7 @@ const resources = {
   projects: "public-projects",
   logs: "public-logs",
   brain: "public-brain",
+  overview: "public-overview",
 } as const
 
 type Resource = keyof typeof resources

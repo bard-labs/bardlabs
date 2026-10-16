@@ -1,16 +1,16 @@
 import Link from "next/link"
 
 const productLinks = [
-  { href: "/projects", label: "Archive" },
-  { href: "/map", label: "Connections" },
+  { href: "/#now", label: "Now" },
+  { href: "/#disciplines", label: "Lab" },
+  { href: "/projects", label: "Projects" },
   { href: "/brain", label: "Brain" },
-  { href: "/log", label: "Logs" },
-  { href: "/lab/systems", label: "Systems" },
 ]
 
 const resourceLinks = [
+  { href: "https://bardiamardan.xyz", label: "bardiamardan.xyz", external: true },
   { href: "https://github.com/BardiaMardan", label: "GitHub", external: true },
-  { href: "https://linkedin.com", label: "LinkedIn", external: true },
+  { href: "https://www.linkedin.com/in/bardiamardan", label: "LinkedIn", external: true },
   { href: "mailto:hello@bardialabs.com", label: "Contact" },
   { href: "/dashboard", label: "Admin" },
 ]

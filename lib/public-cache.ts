@@ -1,6 +1,9 @@
 "use client"
 
-export async function invalidatePublicCache(resource: "projects" | "logs" | "brain", id?: string) {
+export async function invalidatePublicCache(
+  resource: "projects" | "logs" | "brain" | "overview",
+  id?: string,
+) {
   try {
     const response = await fetch("/api/cache/revalidate", {
       method: "POST",
