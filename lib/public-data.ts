@@ -42,7 +42,7 @@ export type PublicOverview = {
 const OVERVIEW_DEFAULT: PublicOverview = {
   goal: "Keep the lab clear, and keep building.",
   summary:
-    "Bardlabs is the workshop for systems, software, mechanics, and inquiry. Projects are what got built. The brain is the map of ideas. The personal site lives apart from this lab.",
+    "Bardlabs is a personal identity lab: who I am, how I think, what I build, what I investigate, and where those interests meet. The portfolio of web work lives on its own site.",
 }
 
 const PERSONAL_SITE: PublicSiteLink = {

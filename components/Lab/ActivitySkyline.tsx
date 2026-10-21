@@ -31,7 +31,7 @@ export function ActivitySkyline() {
         <p className="text-[10px] uppercase tracking-[0.28em] text-neutral-500 sm:text-[11px]">
           Activity
         </p>
-        <h2 className="mt-2 text-2xl font-medium tracking-tight sm:text-3xl md:text-4xl">
+        <h2 className="font-label mt-2 text-2xl font-light tracking-tight sm:text-3xl md:text-4xl">
           A year of signal
         </h2>
         <p className="mt-3 max-w-xl text-sm text-neutral-500">

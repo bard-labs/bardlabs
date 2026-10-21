@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ArrowUpRight, Brain } from "lucide-react"
 import GlowHero from "@/components/ui/hero-1"
 import { ActivitySkyline } from "@/components/Lab/ActivitySkyline"
+import { LabQuestions, LabTurns } from "@/components/Lab/IdentitySections"
 import { LabOverview } from "@/components/Lab/LabOverview"
 import { FooterRevealSpacer, SiteFooter } from "@/components/Lab/SiteFooter"
 import { labDisciplines } from "@/lib/lab"
@@ -75,9 +76,12 @@ export function HomeExperience({
               <p className="text-[10px] uppercase tracking-[0.28em] text-neutral-500 sm:text-[11px]">
                 Lab
               </p>
-              <h2 className="mt-2 text-2xl font-medium tracking-tight sm:text-3xl md:text-4xl">
-                Where the work overlaps
+              <h2 className="font-label mt-2 text-2xl font-light tracking-tight sm:text-3xl md:text-4xl">
+                The fields
               </h2>
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-neutral-500">
+                Six interests, held in one place. The web portfolio lives on its own site.
+              </p>
             </div>
           </div>
 
@@ -92,7 +96,7 @@ export function HomeExperience({
                   className="mb-6 text-neutral-400 transition-colors group-hover:text-white"
                   size={22}
                 />
-                <h3 className="text-xl font-medium tracking-tight sm:text-2xl">{title}</h3>
+                <h3 className="font-label text-xl font-light tracking-tight sm:text-2xl">{title}</h3>
                 <p className="mt-3 max-w-sm text-sm leading-relaxed text-neutral-500">{summary}</p>
               </Link>
             ))}
@@ -100,6 +104,10 @@ export function HomeExperience({
         </section>
 
         <LabOverview overview={overview} links={links} snapshot={snapshot} />
+
+        <LabTurns />
+
+        <LabQuestions />
 
         <ActivitySkyline />
 
@@ -110,8 +118,8 @@ export function HomeExperience({
           >
             <ArrowUpRight className="text-neutral-500 transition-colors group-hover:text-white" />
             <div>
-              <h3 className="text-2xl font-medium tracking-tight">Projects</h3>
-              <p className="mt-2 text-sm text-neutral-500">What got built</p>
+              <h3 className="font-label text-2xl font-light tracking-tight">Projects</h3>
+              <p className="mt-2 text-sm text-neutral-500">Built inside the lab</p>
             </div>
           </Link>
           <Link
@@ -120,8 +128,8 @@ export function HomeExperience({
           >
             <Brain className="text-neutral-500 transition-colors group-hover:text-cyan-400" size={22} />
             <div>
-              <h3 className="text-2xl font-medium tracking-tight">Brain</h3>
-              <p className="mt-2 text-sm text-neutral-500">The map of ideas</p>
+              <h3 className="font-label text-2xl font-light tracking-tight">Brain</h3>
+              <p className="mt-2 text-sm text-neutral-500">How the interests connect</p>
             </div>
           </Link>
         </section>

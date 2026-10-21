@@ -3,6 +3,7 @@ import Link from "next/link"
 const productLinks = [
   { href: "/#now", label: "Now" },
   { href: "/#disciplines", label: "Lab" },
+  { href: "/#questions", label: "Questions" },
   { href: "/projects", label: "Projects" },
   { href: "/brain", label: "Brain" },
 ]
@@ -25,8 +26,8 @@ export function SiteFooter() {
     >
       <div className="pointer-events-auto mx-auto flex h-full w-full max-w-6xl flex-col justify-between gap-6 px-5 py-6 sm:gap-8 sm:px-8 sm:py-8 md:px-10 md:py-10">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
-          <p className="max-w-[14ch] text-lg font-medium tracking-tight text-neutral-900 sm:text-2xl md:text-3xl">
-            Experience liftoff
+          <p className="font-label max-w-[12ch] text-lg font-light tracking-tight text-neutral-900 sm:text-2xl md:text-3xl">
+            A personal identity lab
           </p>
 
           <div className="grid grid-cols-2 gap-8 sm:gap-16">
@@ -78,7 +79,7 @@ export function SiteFooter() {
 
         <div className="min-w-0 overflow-hidden">
           <p
-            className="select-none font-semibold tracking-[-0.04em] text-black uppercase"
+            className="font-display select-none font-light tracking-[-0.04em] text-black uppercase"
             style={{
               fontSize: "clamp(2.5rem, 17vw, 11rem)",
               lineHeight: 0.85,

@@ -1,5 +1,5 @@
-import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
+import { LAB_IDENTITY, LEGACY_LAB_SUMMARY, linkNote } from "@/lib/lab-copy"
 import type { PublicOverview, PublicSiteLink } from "@/lib/public-data"
 
 export type LabSnapshot = {
@@ -17,6 +17,9 @@ export function LabOverview({
   links: PublicSiteLink[]
   snapshot: LabSnapshot
 }) {
+  const summary = overview.summary.trim()
+  const showSummary = summary.length > 0 && summary !== LEGACY_LAB_SUMMARY
+
   const facts = [
     { label: "Completed", value: snapshot.completed.length },
     { label: "Active", value: snapshot.active },
@@ -35,16 +38,23 @@ export function LabOverview({
               <p className="text-[11px] font-medium tracking-[0.18em] text-neutral-500 uppercase">
                 Goal
               </p>
-              <h2 className="mt-3 max-w-[14ch] text-[clamp(2rem,4vw,3.25rem)] leading-[1.05] font-medium tracking-[-0.03em]">
+              <h2 className="font-display mt-3 max-w-[14ch] text-[clamp(2rem,4vw,3.25rem)] leading-[1.05] font-light tracking-[-0.03em]">
                 {overview.goal}
               </h2>
+              <p className="font-serif mt-8 text-2xl leading-snug font-light text-neutral-300 italic">
+                Bardia Mardan
+              </p>
+              <p className="mt-2 text-sm tracking-[0.14em] text-neutral-500 uppercase">Iran</p>
             </div>
           </div>
 
           <div className="p-8 sm:p-10 md:col-span-7 md:p-12">
-            <p className="max-w-lg text-[15px] leading-relaxed text-neutral-400">
-              {overview.summary}
+            <p className="max-w-lg text-[15px] leading-relaxed text-neutral-300">
+              {LAB_IDENTITY}
             </p>
+            {showSummary ? (
+              <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-neutral-500">{summary}</p>
+            ) : null}
 
             <dl className="mt-8 border-t border-white/10">
               {facts.map((fact) => (
@@ -55,25 +65,11 @@ export function LabOverview({
               ))}
             </dl>
 
-            {snapshot.completed.length > 0 ? (
-              <ul className="mt-6 space-y-2">
-                {snapshot.completed.map((project) => (
-                  <li key={project.id}>
-                    <Link
-                      href={`/projects/${project.id}`}
-                      className="text-[15px] text-neutral-400 transition-colors hover:text-white active:opacity-70"
-                    >
-                      {project.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-
             <ul className="mt-10">
               {links.map((link) => {
                 const external = link.url.startsWith("http")
                 const prominent = link.id === "website" || link.url.includes("bardiamardan.xyz")
+                const note = linkNote(link)
                 return (
                   <li key={link.id} className="border-t border-white/10">
                     <a
@@ -84,8 +80,13 @@ export function LabOverview({
                         prominent ? "text-white" : "text-neutral-300"
                       }`}
                     >
-                      <span className={prominent ? "text-[17px] tracking-[-0.01em]" : "text-[15px]"}>
-                        {link.label}
+                      <span className="min-w-0">
+                        <span className={`block ${prominent ? "text-[17px] tracking-[-0.01em]" : "text-[15px]"}`}>
+                          {link.label}
+                        </span>
+                        {note ? (
+                          <span className="mt-0.5 block text-sm leading-snug text-neutral-500">{note}</span>
+                        ) : null}
                       </span>
                       <ArrowUpRight size={15} className="shrink-0 text-neutral-500" />
                     </a>
